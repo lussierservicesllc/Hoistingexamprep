@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MA Hoisting License Exam Prep — 2A-1C Study Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── MA.GOV COLOR PALETTE ── */
+:root {
+  --ma-navy:     #14558F;
+  --ma-navy-dk:  #0D3B63;
+  --ma-navy-lt:  #1A6BAF;
+  --ma-cran:     #C63228;
+  --ma-cran-dk:  #9E2820;
+  --ma-gold:     #F5A623;
+  --ma-green:    #2D8653;
+  --ma-bg:       #F2F4F7;
+  --ma-surface:  #FFFFFF;
+  --ma-border:   #D0D8E4;
+  --ma-text:     #1A1F2E;
+  --ma-muted:    #5A6A7E;
+  --ma-dark:     #0D0F14;
+  --heading: 'Bebas Neue', sans-serif;
+  --body:    'DM Sans', sans-serif;
+  --mono:    'DM Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--ma-bg); color: var(--ma-text); font-family: var(--body); }
+
+/* ── TOP BAR (MA.gov style) ── */
+.ma-topbar {
+  background: var(--ma-navy-dk);
+  padding: 8px 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ma-topbar-flag { font-size: 1.1rem; }
+.ma-topbar span {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.75);
+  font-family: var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.ma-topbar strong { color: #fff; }
+
+/* ── SITE HEADER ── */
+.site-header {
+  background: var(--ma-navy);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  border-bottom: 4px solid var(--ma-cran);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+.site-logo-icon { font-size: 1.8rem; filter: drop-shadow(0 0 8px rgba(245,166,35,0.6)); }
+.site-logo-text { font-family: var(--heading); font-size: 1.5rem; letter-spacing: 3px; color: #fff; line-height: 1; }
+.site-logo-sub { font-family: var(--mono); font-size: 0.6rem; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; text-transform: uppercase; }
+
+.header-cta {
+  background: var(--ma-cran);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 22px;
+  font-family: var(--heading);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.header-cta:hover { background: var(--ma-cran-dk); }
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, var(--ma-navy-dk) 0%, var(--ma-navy) 60%, #1a3a5c 100%);
+  padding: 80px 32px 90px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-badge {
+  display: inline-block;
+  background: rgba(245,166,35,0.15);
+  border: 1px solid rgba(245,166,35,0.4);
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: var(--ma-gold);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: var(--heading);
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  letter-spacing: 4px;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.hero h1 span { color: var(--ma-gold); }
+.hero-sub {
+  font-size: 1.15rem;
+  color: rgba(255,255,255,0.8);
+  max-width: 560px;
+  margin: 0 auto 32px;
+  line-height: 1.65;
+}
+.hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--ma-cran);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 14px 32px;
+  font-family: var(--heading);
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn-primary:hover { background: var(--ma-cran-dk); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(198,50,40,0.4); }
+.btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 5px;
+  padding: 14px 32px;
+  font-family: var(--heading);
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn-secondary:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  margin-top: 48px;
+  flex-wrap: wrap;
+}
+.hero-stat { text-align: center; }
+.hero-stat-num { font-family: var(--heading); font-size: 2.4rem; color: var(--ma-gold); letter-spacing: 2px; line-height: 1; }
+.hero-stat-lbl { font-family: var(--mono); font-size: 0.62rem; color: rgba(255,255,255,0.55); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+/* ── SECTIONS ── */
+section { padding: 72px 32px; }
+.section-inner { max-width: 1000px; margin: 0 auto; }
+.section-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ma-navy);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--heading);
+  font-size: clamp(2rem, 5vw, 3rem);
+  letter-spacing: 3px;
+  color: var(--ma-text);
+  margin-bottom: 14px;
+}
+.section-title span { color: var(--ma-cran); }
+.section-body { font-size: 1rem; color: var(--ma-muted); line-height: 1.75; max-width: 620px; }
+
+/* ── FEATURES ── */
+#features { background: var(--ma-surface); }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+}
+.feature-card {
+  background: var(--ma-bg);
+  border: 1px solid var(--ma-border);
+  border-radius: 8px;
+  padding: 24px;
+  border-top: 3px solid var(--ma-navy);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.feature-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(20,85,143,0.12); }
+.feature-icon { font-size: 2rem; margin-bottom: 12px; display: block; }
+.feature-title { font-family: var(--heading); font-size: 1.2rem; letter-spacing: 1.5px; color: var(--ma-navy); margin-bottom: 6px; }
+.feature-desc { font-size: 0.88rem; color: var(--ma-muted); line-height: 1.65; }
+
+/* ── FREE SAMPLE QUIZ ── */
+#sample { background: var(--ma-bg); }
+.quiz-container {
+  max-width: 680px;
+  margin: 36px auto 0;
+  background: var(--ma-surface);
+  border: 1px solid var(--ma-border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(20,85,143,0.1);
+}
+.quiz-topbar {
+  background: var(--ma-navy);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.quiz-topbar-title { font-family: var(--heading); font-size: 1rem; letter-spacing: 2px; color: #fff; }
+.quiz-topbar-counter { font-family: var(--mono); font-size: 0.68rem; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; }
+.quiz-prog-wrap { height: 4px; background: rgba(255,255,255,0.15); }
+.quiz-prog-fill { height: 100%; background: var(--ma-gold); transition: width 0.5s ease; width: 20%; }
+.quiz-body { padding: 28px 24px; }
+.quiz-cat { font-family: var(--mono); font-size: 0.62rem; color: var(--ma-cran); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.quiz-q { font-size: 1.02rem; line-height: 1.65; color: var(--ma-text); margin-bottom: 22px; font-weight: 500; }
+.quiz-opt {
+  display: block; width: 100%; text-align: left;
+  background: var(--ma-bg); border: 1.5px solid var(--ma-border);
+  border-radius: 6px; padding: 12px 16px; margin-bottom: 10px;
+  color: var(--ma-text); font-family: var(--body); font-size: 0.9rem;
+  cursor: pointer; transition: all 0.15s; line-height: 1.4;
+}
+.quiz-opt:hover:not(:disabled) { border-color: var(--ma-navy); color: var(--ma-navy); background: #EBF2FA; }
+.quiz-opt.correct { background: #E6F6EE; border-color: var(--ma-green); color: var(--ma-green); font-weight: 600; }
+.quiz-opt.wrong { background: #FDECEA; border-color: var(--ma-cran); color: var(--ma-cran); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-exp {
+  background: #EBF2FA; border-left: 3px solid var(--ma-navy);
+  padding: 12px 16px; border-radius: 0 6px 6px 0;
+  font-size: 0.86rem; line-height: 1.65; color: var(--ma-muted);
+  margin-top: 4px; display: none;
+}
+.quiz-exp.show { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);} }
+.quiz-next {
+  background: var(--ma-navy); color: #fff; border: none;
+  border-radius: 5px; padding: 11px 28px; font-family: var(--heading);
+  font-size: 0.95rem; letter-spacing: 2px; cursor: pointer;
+  margin-top: 16px; transition: all 0.2s; display: none;
+}
+.quiz-next:hover { background: var(--ma-navy-lt); }
+.quiz-next.show { display: inline-block; }
+
+/* Score screen */
+.quiz-score-screen { text-align: center; padding: 40px 24px; display: none; }
+.quiz-score-screen.show { display: block; animation: fadeIn 0.4s ease; }
+.score-big { font-family: var(--heading); font-size: 4.5rem; color: var(--ma-navy); letter-spacing: 3px; }
+.score-sub { font-family: var(--mono); font-size: 0.72rem; color: var(--ma-muted); letter-spacing: 2px; text-transform: uppercase; }
+.score-msg { font-size: 1rem; color: var(--ma-text); margin: 14px 0 28px; }
+.score-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.score-retry {
+  background: var(--ma-bg); color: var(--ma-navy); border: 1.5px solid var(--ma-navy);
+  border-radius: 5px; padding: 11px 24px; font-family: var(--heading);
+  font-size: 0.95rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s;
+}
+.score-retry:hover { background: var(--ma-navy); color: #fff; }
+.score-unlock {
+  background: var(--ma-cran); color: #fff; border: none;
+  border-radius: 5px; padding: 11px 24px; font-family: var(--heading);
+  font-size: 0.95rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s;
+}
+.score-unlock:hover { background: var(--ma-cran-dk); }
+
+/* ── PRICING ── */
+#pricing { background: var(--ma-surface); }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+  max-width: 720px;
+}
+.pricing-card {
+  border: 1.5px solid var(--ma-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ma-bg);
+}
+.pricing-card.featured {
+  border-color: var(--ma-navy);
+  box-shadow: 0 8px 32px rgba(20,85,143,0.18);
+  background: var(--ma-surface);
+}
+.pricing-header {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--ma-border);
+}
+.pricing-card.featured .pricing-header { background: var(--ma-navy); }
+.pricing-tier { font-family: var(--heading); font-size: 1.4rem; letter-spacing: 2px; color: var(--ma-text); }
+.pricing-card.featured .pricing-tier { color: #fff; }
+.pricing-price { font-family: var(--heading); font-size: 3rem; color: var(--ma-navy); letter-spacing: 2px; line-height: 1.1; margin-top: 8px; }
+.pricing-card.featured .pricing-price { color: var(--ma-gold); }
+.pricing-period { font-family: var(--mono); font-size: 0.65rem; color: var(--ma-muted); letter-spacing: 1px; }
+.pricing-card.featured .pricing-period { color: rgba(255,255,255,0.55); }
+.pricing-body { padding: 20px 24px; }
+.pricing-feature {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 0.88rem; color: var(--ma-muted); margin-bottom: 10px; line-height: 1.5;
+}
+.pricing-feature .check { color: var(--ma-green); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.pricing-feature .lock { color: var(--ma-border); font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+.pricing-btn {
+  display: block; width: 100%; text-align: center;
+  background: var(--ma-navy); color: #fff; border: none;
+  border-radius: 5px; padding: 12px; font-family: var(--heading);
+  font-size: 1rem; letter-spacing: 2px; cursor: pointer;
+  transition: all 0.2s; margin-top: 20px; text-decoration: none;
+}
+.pricing-btn:hover { background: var(--ma-navy-lt); }
+.pricing-btn.free { background: transparent; color: var(--ma-navy); border: 1.5px solid var(--ma-navy); }
+.pricing-btn.free:hover { background: var(--ma-navy); color: #fff; }
+.pricing-btn.cran { background: var(--ma-cran); }
+.pricing-btn.cran:hover { background: var(--ma-cran-dk); }
+.featured-badge {
+  display: inline-block;
+  background: var(--ma-gold);
+  color: #000;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ── WHAT'S COVERED ── */
+#topics { background: var(--ma-bg); }
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 36px;
+}
+.topic-pill {
+  background: var(--ma-surface);
+  border: 1px solid var(--ma-border);
+  border-left: 3px solid var(--ma-navy);
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topic-pill .icon { font-size: 1.3rem; }
+.topic-pill .name { font-family: var(--heading); font-size: 1rem; letter-spacing: 1px; color: var(--ma-text); }
+.topic-pill .sub { font-size: 0.75rem; color: var(--ma-muted); margin-top: 1px; }
+
+/* ── TESTIMONIALS ── */
+#social { background: var(--ma-navy-dk); padding: 72px 32px; }
+#social .section-title { color: #fff; }
+#social .section-label { color: var(--ma-gold); }
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 36px;
+}
+.testimonial {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 22px;
+}
+.testimonial-text { font-size: 0.9rem; color: rgba(255,255,255,0.8); line-height: 1.7; font-style: italic; margin-bottom: 14px; }
+.testimonial-author { font-family: var(--mono); font-size: 0.68rem; color: var(--ma-gold); letter-spacing: 1.5px; text-transform: uppercase; }
+.stars { color: var(--ma-gold); font-size: 0.85rem; margin-bottom: 8px; }
+
+/* ── FULL TOOL GATE ── */
+#full-tool-section { background: var(--ma-bg); padding: 72px 32px; }
+.gate-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: center;
+  background: var(--ma-surface);
+  border: 1px solid var(--ma-border);
+  border-radius: 10px;
+  padding: 48px 32px;
+  box-shadow: 0 4px 24px rgba(20,85,143,0.08);
+}
+.gate-icon { font-size: 3.5rem; margin-bottom: 16px; display: block; }
+.gate-title { font-family: var(--heading); font-size: 2rem; letter-spacing: 3px; color: var(--ma-navy); margin-bottom: 8px; }
+.gate-sub { font-size: 0.95rem; color: var(--ma-muted); margin-bottom: 28px; line-height: 1.65; }
+.gate-input-row { display: flex; gap: 10px; max-width: 420px; margin: 0 auto 12px; }
+.gate-input {
+  flex: 1; background: var(--ma-bg); border: 1.5px solid var(--ma-border);
+  border-radius: 5px; padding: 12px 16px; font-family: var(--body);
+  font-size: 0.9rem; color: var(--ma-text); outline: none;
+  transition: border-color 0.2s;
+}
+.gate-input:focus { border-color: var(--ma-navy); }
+.gate-btn {
+  background: var(--ma-cran); color: #fff; border: none;
+  border-radius: 5px; padding: 12px 22px; font-family: var(--heading);
+  font-size: 0.95rem; letter-spacing: 1.5px; cursor: pointer;
+  transition: background 0.2s; white-space: nowrap;
+}
+.gate-btn:hover { background: var(--ma-cran-dk); }
+.gate-note { font-family: var(--mono); font-size: 0.62rem; color: var(--ma-muted); letter-spacing: 1px; }
+/* Demo unlock button */
+.gate-demo-note { margin-top: 16px; font-size: 0.8rem; color: var(--ma-muted); }
+.gate-demo-link { color: var(--ma-navy); cursor: pointer; text-decoration: underline; }
+
+/* The actual tool embed (hidden until unlocked) */
+#tool-embed { display: none; margin-top: 0; }
+#tool-embed iframe {
+  width: 100%; height: 85vh; border: none;
+  border-radius: 0 0 10px 10px;
+  display: block;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--ma-navy-dk);
+  padding: 36px 32px;
+  border-top: 4px solid var(--ma-cran);
+}
+.footer-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-logo { font-family: var(--heading); font-size: 1.4rem; letter-spacing: 3px; color: #fff; }
+.footer-logo span { color: var(--ma-gold); }
+.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+.footer-links a { font-family: var(--mono); font-size: 0.65rem; color: rgba(255,255,255,0.5); text-decoration: none; letter-spacing: 1px; text-transform: uppercase; transition: color 0.2s; }
+.footer-links a:hover { color: #fff; }
+.footer-copy { font-family: var(--mono); font-size: 0.62rem; color: rgba(255,255,255,0.35); letter-spacing: 1px; width: 100%; margin-top: 8px; }
+
+/* ── MA STATE SEAL WATERMARK ── */
+.ma-seal-bar {
+  background: var(--ma-navy);
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.ma-seal-bar p { font-family: var(--mono); font-size: 0.62rem; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
+
+/* ── UTILITY ── */
+.divider { height: 1px; background: var(--ma-border); margin: 20px 0; }
+.text-center { text-align: center; }
+.mt-sm { margin-top: 12px; }
+.mt-md { margin-top: 24px; }
+.notice {
+  background: #EBF2FA; border: 1px solid #b3cfea; border-left: 4px solid var(--ma-navy);
+  border-radius: 5px; padding: 12px 16px; font-size: 0.84rem;
+  color: var(--ma-navy); margin-top: 20px; line-height: 1.6;
+}
+
+/* ── BUY MODAL ── */
+.buy-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 600; display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.buy-modal-overlay.open { display: flex; }
+.buy-modal {
+  background: var(--ma-surface); border-radius: 12px;
+  max-width: 480px; width: 100%; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: fadeIn 0.25s ease;
+}
+.buy-modal-header {
+  background: var(--ma-navy); padding: 24px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.buy-modal-header h3 { font-family: var(--heading); font-size: 1.5rem; letter-spacing: 2px; color: #fff; }
+.buy-modal-close { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; }
+.buy-modal-close:hover { color: #fff; }
+.buy-modal-body { padding: 28px; }
+.buy-modal-price { display: flex; align-items: baseline; gap: 8px; margin-bottom: 20px; }
+.buy-modal-price .price-big { font-family: var(--heading); font-size: 3.5rem; color: var(--ma-navy); letter-spacing: 2px; line-height: 1; }
+.buy-modal-price .price-note { font-family: var(--mono); font-size: 0.68rem; color: var(--ma-muted); letter-spacing: 1px; text-transform: uppercase; }
+.buy-modal-includes { margin-bottom: 24px; }
+.buy-modal-includes .item { display: flex; gap: 10px; font-size: 0.87rem; color: var(--ma-muted); margin-bottom: 8px; align-items: center; }
+.buy-modal-includes .item .ck { color: var(--ma-green); font-size: 1rem; }
+.buy-stripe-btn {
+  display: block; width: 100%; text-align: center;
+  background: var(--ma-cran); color: #fff; border: none;
+  border-radius: 6px; padding: 15px; font-family: var(--heading);
+  font-size: 1.1rem; letter-spacing: 2px; cursor: pointer;
+  transition: all 0.2s; text-decoration: none; margin-bottom: 12px;
+}
+.buy-stripe-btn:hover { background: var(--ma-cran-dk); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(198,50,40,0.35); }
+.buy-modal-alt { text-align: center; font-size: 0.82rem; color: var(--ma-muted); }
+.buy-modal-alt a { color: var(--ma-navy); font-weight: 600; }
+
+@media (max-width: 600px) {
+  .site-header { padding: 0 16px; }
+  section { padding: 52px 16px; }
+  .hero { padding: 56px 16px 64px; }
+  .gate-input-row { flex-direction: column; }
+  .hero-stats { gap: 24px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- BUY MODAL -->
+<div class="buy-modal-overlay" id="buy-modal" onclick="if(event.target===this)closeBuyModal()">
+  <div class="buy-modal">
+    <div class="buy-modal-header">
+      <h3>🏗️ GET FULL ACCESS</h3>
+      <button class="buy-modal-close" onclick="closeBuyModal()">✕</button>
+    </div>
+    <div class="buy-modal-body">
+      <div class="buy-modal-price">
+        <div class="price-big">$29</div>
+        <div class="price-note">One-time · Lifetime access<br>Works on any device</div>
+      </div>
+      <div class="buy-modal-includes">
+        <div class="item"><span class="ck">✓</span> 25+ practice questions with explanations</div>
+        <div class="item"><span class="ck">✓</span> Hand signal quiz — all 14 ASME B30.5 signals</div>
+        <div class="item"><span class="ck">✓</span> DigSafe flashcard games (3 modes)</div>
+        <div class="item"><span class="ck">✓</span> MGL Ch.146 &amp; 230 CMR 6 law summaries</div>
+        <div class="item"><span class="ck">✓</span> Rigging, excavation &amp; forklift sections</div>
+        <div class="item"><span class="ck">✓</span> Progress tracker &amp; topic breakdown</div>
+        <div class="item"><span class="ck">✓</span> Quick reference cheat sheet</div>
+      </div>
+      <a href="https://buy.stripe.com/4gM5kE7R57QWdJL6GE6sw01" target="_blank" class="buy-stripe-btn" id="buy-action-btn">
+        PURCHASE FOR $29 →
+      </a>
+      <div class="buy-modal-alt">
+        Questions? Email <a href="mailto:lussierservicesllc@gmail.com">lussierservicesllc@gmail.com</a><br>
+        <span style="font-size:0.75rem;margin-top:6px;display:block;">Access code delivered by email moments after purchase</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MA.gov top bar -->
+<div class="ma-topbar">
+  <span class="ma-topbar-flag">🏛️</span>
+  <span>Official Massachusetts Hoisting License Exam Resource &nbsp;·&nbsp; <strong>MGL Chapter 146 · 230 CMR 6</strong></span>
+</div>
+
+<!-- Site Header -->
+<header class="site-header">
+  <a href="#" class="site-logo">
+    <span class="site-logo-icon">🏗️</span>
+    <div>
+      <div class="site-logo-text">HoistingExamPrep</div>
+      <div class="site-logo-sub">Massachusetts 2A-1C Study Tool</div>
+    </div>
+  </a>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <input id="header-code-input" type="text" placeholder="Have a code? Enter here..." style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);border-radius:4px;padding:8px 12px;font-family:var(--mono);font-size:0.68rem;color:#fff;letter-spacing:1px;width:190px;outline:none;" onkeydown="if(event.key==='Enter')headerCheckCode()"/>
+      <button onclick="headerCheckCode()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:4px;padding:8px 14px;font-family:var(--mono);font-size:0.68rem;color:#fff;letter-spacing:1px;cursor:pointer;white-space:nowrap;">Unlock →</button>
+    </div>
+    <button onclick="openBuyModal()" style="background:none;border:none;font-family:var(--mono);font-size:0.68rem;color:rgba(255,255,255,0.7);cursor:pointer;letter-spacing:1px;">$29 Full Access</button>
+    <button onclick="scrollToSample()" class="header-cta">Free Sample Quiz</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Massachusetts Board of Boiler Rules · MGL Ch. 146</div>
+  <h1>Pass Your <span>2A-1C</span><br>Hoisting Exam</h1>
+  <p class="hero-sub">The most comprehensive Massachusetts hoisting license study tool. Built for operators, by operators — covering every topic tested on the exam.</p>
+  <div class="hero-btns">
+    <button onclick="openBuyModal()" class="btn-primary">Get Full Access — $29</button>
+    <button onclick="scrollToSample()" class="btn-secondary">Try Free Sample First</button>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">25+</div><div class="hero-stat-lbl">Practice Questions</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">9</div><div class="hero-stat-lbl">Exam Topics</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">14</div><div class="hero-stat-lbl">Hand Signals</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">8</div><div class="hero-stat-lbl">DigSafe Colors</div></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-label">What's Inside</div>
+    <div class="section-title">Everything You Need to <span>Pass Monday</span></div>
+    <p class="section-body">Built directly from MGL Chapter 146, 230 CMR 6, OSHA Subpart P, and the official ASME B30.5 hand signal standard.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">📋</span>
+        <div class="feature-title">Law Sections</div>
+        <div class="feature-desc">MGL Ch.146 §§53, 53A, 54A, 57, 65 and 230 CMR 6 — fully summarized with key facts highlighted and bookmarkable.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🤚</span>
+        <div class="feature-title">Hand Signal Quiz</div>
+        <div class="feature-desc">SVG illustrated figures for all 14 ASME B30.5 signals. Browse mode + interactive quiz mode with streak tracking.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎨</span>
+        <div class="feature-title">DigSafe Flashcards</div>
+        <div class="feature-desc">Three interactive modes: flip cards, guess the color, guess the utility. All 8 APWA color codes covered.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🚨</span>
+        <div class="feature-title">Accident Scene Rules</div>
+        <div class="feature-desc">Who can and cannot release an accident scene — one of the most commonly failed topics on the 2A-1C exam.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🪝</span>
+        <div class="feature-title">Rigging</div>
+        <div class="feature-desc">Sling types, hitch configurations, sling angles, rejection criteria, and load weight calculation rules.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⛏️</span>
+        <div class="feature-title">Excavation &amp; Shoring</div>
+        <div class="feature-desc">Soil types A/B/C, protective systems, depth rules, ladder requirements, and DigSafe excavation protocols.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🚜</span>
+        <div class="feature-title">Forklifts (4D License)</div>
+        <div class="feature-desc">Stability triangle, load capacity, pre-op inspection, safe travel rules, and MA 4D licensing requirements.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <div class="feature-title">Progress Tracker</div>
+        <div class="feature-desc">Tracks your score by topic across sessions. See exactly where your weak spots are before exam day.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-title">Quick Reference Sheet</div>
+        <div class="feature-desc">All the critical numbers, rules, and facts on one screen. Print it or drill it the morning of your exam.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING — moved up for visibility -->
+<section id="pricing" style="background:var(--ma-surface);padding-top:56px;padding-bottom:56px;">
+  <div class="section-inner">
+    <div class="section-label">Simple Pricing</div>
+    <div class="section-title">One Price. <span>Full Access.</span></div>
+    <p class="section-body">No subscription traps. Pay once, study as long as you need, on any device.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <div class="pricing-tier">Free Sample</div>
+          <div class="pricing-price">$0</div>
+          <div class="pricing-period">No account required</div>
+        </div>
+        <div class="pricing-body">
+          <div class="pricing-feature"><span class="check">✓</span> 5 sample quiz questions</div>
+          <div class="pricing-feature"><span class="check">✓</span> Score breakdown</div>
+          <div class="pricing-feature"><span class="lock">🔒</span> Full 25+ question quiz</div>
+          <div class="pricing-feature"><span class="lock">🔒</span> Hand signal quiz (14 signals)</div>
+          <div class="pricing-feature"><span class="lock">🔒</span> DigSafe flashcard games</div>
+          <div class="pricing-feature"><span class="lock">🔒</span> Law section summaries</div>
+          <div class="pricing-feature"><span class="lock">🔒</span> Rigging, excavation, forklifts</div>
+          <div class="pricing-feature"><span class="lock">🔒</span> Progress tracker</div>
+          <a href="#sample" class="pricing-btn free">Try Free Quiz</a>
+        </div>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-header">
+          <div class="pricing-tier">Full Access <span class="featured-badge">Best Value</span></div>
+          <div class="pricing-price">$29</div>
+          <div class="pricing-period">One-time · Lifetime access</div>
+        </div>
+        <div class="pricing-body">
+          <div class="pricing-feature"><span class="check" style="color:#2ecc71">✓</span> 25+ practice questions</div>
+          <div class="pricing-feature"><span class="check" style="color:#2ecc71">✓</span> Hand signal quiz (all 14 signals)</div>
+          <div class="pricing-feature"><span class="check" style="color:#2ecc71">✓</span> DigSafe flashcard games (3 modes)</div>
+          <div class="pricing-feature"><span class="check" style="color:#2ecc71">✓</span> MGL Ch.146 &amp; 230 CMR 6 summaries</div>
+          <div class="pricing-feature"><span class="check" style="color:#2ecc71">✓</span> Rigging, excavation &amp; forklift sections</div>
+          <div class="pricing-feature"><span class="check" style="color:#2ecc71">✓</span> Progress tracker &amp; topic breakdown</div>
+          <div class="pricing-feature"><span class="check" style="color:#2ecc71">✓</span> Quick reference cheat sheet</div>
+          <div class="pricing-feature"><span class="check" style="color:#2ecc71">✓</span> Works offline on any device</div>
+          <button onclick="openBuyModal()" class="pricing-btn cran">Get Full Access →</button>
+        </div>
+      </div>
+    </div>
+    <p class="mt-md" style="font-family:var(--mono);font-size:0.68rem;color:var(--ma-muted);letter-spacing:1px;">* Stripe payment integration coming soon. Contact us directly to purchase access.</p>
+  </div>
+</section>
+
+<!-- TOPICS COVERED -->
+<section id="topics">
+  <div class="section-inner">
+    <div class="section-label">Full Coverage</div>
+    <div class="section-title">Every Topic on the <span>2A-1C Exam</span></div>
+    <div class="topics-grid">
+      <div class="topic-pill"><span class="icon">📋</span><div><div class="name">MGL Ch. 146</div><div class="sub">§§ 53, 53A, 54A, 57, 65</div></div></div>
+      <div class="topic-pill"><span class="icon">📐</span><div><div class="name">230 CMR 6</div><div class="sub">Operator duties & regulations</div></div></div>
+      <div class="topic-pill"><span class="icon">🤚</span><div><div class="name">Hand Signals</div><div class="sub">All 14 ASME B30.5 signals</div></div></div>
+      <div class="topic-pill"><span class="icon">🎨</span><div><div class="name">DigSafe Colors</div><div class="sub">All 8 APWA utility codes</div></div></div>
+      <div class="topic-pill"><span class="icon">🚨</span><div><div class="name">Accident Reporting</div><div class="sub">Scene release authority</div></div></div>
+      <div class="topic-pill"><span class="icon">🪝</span><div><div class="name">Rigging</div><div class="sub">Slings, angles, hitches</div></div></div>
+      <div class="topic-pill"><span class="icon">⛏️</span><div><div class="name">Excavation</div><div class="sub">Soil types, shoring, safety</div></div></div>
+      <div class="topic-pill"><span class="icon">🚜</span><div><div class="name">Forklifts</div><div class="sub">4D license & stability rules</div></div></div>
+      <div class="topic-pill"><span class="icon">⚡</span><div><div class="name">Power Line Safety</div><div class="sub">10-ft rule & clearances</div></div></div>
+      <div class="topic-pill"><span class="icon">🏗️</span><div><div class="name">Load Charts</div><div class="sub">Boom angle & capacity</div></div></div>
+      <div class="topic-pill"><span class="icon">🔑</span><div><div class="name">License Classes</div><div class="sub">1A, 1C, 2A, 2B, 4D</div></div></div>
+      <div class="topic-pill"><span class="icon">🏛️</span><div><div class="name">Board of Boiler Rules</div><div class="sub">Authority & enforcement</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FREE SAMPLE QUIZ -->
+<section id="sample" style="background:var(--ma-surface);">
+  <div class="section-inner">
+    <div class="section-label">Try It Free</div>
+    <div class="section-title">5-Question <span>Sample Quiz</span></div>
+    <p class="section-body">No account needed. Get a taste of what the full tool covers — real questions from the 2A-1C exam.</p>
+
+    <div class="quiz-container">
+      <div class="quiz-topbar">
+        <div class="quiz-topbar-title">FREE SAMPLE — 2A-1C EXAM PREP</div>
+        <div class="quiz-topbar-counter" id="sq-counter">QUESTION 1 OF 5</div>
+      </div>
+      <div class="quiz-prog-wrap"><div class="quiz-prog-fill" id="sq-prog" style="width:20%"></div></div>
+
+      <div id="sq-quiz-body">
+        <div class="quiz-body">
+          <div class="quiz-cat" id="sq-cat"></div>
+          <div class="quiz-q" id="sq-q"></div>
+          <div id="sq-opts"></div>
+          <div class="quiz-exp" id="sq-exp"></div>
+          <button class="quiz-next" id="sq-next" onclick="sqNext()">NEXT QUESTION →</button>
+        </div>
+      </div>
+
+      <div class="quiz-score-screen" id="sq-score">
+        <div class="score-big" id="sq-score-num">0/5</div>
+        <div class="score-sub">Sample Quiz Complete</div>
+        <div class="score-msg" id="sq-score-msg"></div>
+        <div class="notice">The full tool includes 25+ questions, hand signal flashcards, DigSafe flashcard games, law section summaries, rigging rules, excavation guidelines, forklift safety, and a progress tracker.</div>
+        <div class="score-btns mt-md">
+          <button class="score-retry" onclick="sqRestart()">RETAKE SAMPLE</button>
+          <button class="score-unlock" onclick="openBuyModal()">GET FULL ACCESS →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="social">
+  <div class="section-inner">
+    <div class="section-label">From the Field</div>
+    <div class="section-title">What Operators Are Saying</div>
+    <div class="testimonial-grid">
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-text">"Passed my 2A-1C on the first try. The DigSafe color flashcards and the accident scene section were exactly what showed up on my exam."</div>
+        <div class="testimonial-author">— Equipment Operator, Worcester MA</div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-text">"The hand signal quiz with the actual illustrated figures is way better than just reading the book. Drilled it the night before and knew every one."</div>
+        <div class="testimonial-author">— Crane Operator, Springfield MA</div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-text">"I've taken the test twice before and failed. Used this tool for a week and finally passed. The law section breakdown makes the 24-hour reporting rule crystal clear."</div>
+        <div class="testimonial-author">— Site Foreman, Boston MA</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FULL TOOL ACCESS GATE -->
+<section id="full-tool-section">
+  <div class="section-inner">
+    <div id="gate-wrap" class="gate-wrap">
+      <span class="gate-icon">🔓</span>
+      <div class="gate-title">Get Full Access</div>
+      <div class="gate-sub">Enter your access code to unlock the complete 2A-1C study tool. After purchase you'll receive a code by email.</div>
+      <div class="gate-input-row">
+        <input class="gate-input" id="gate-input" type="text" placeholder="Enter access code..." autocomplete="off"/>
+        <button class="gate-btn" onclick="checkCode()">Unlock</button>
+      </div>
+      <div class="gate-note">Access codes are sent to your email after purchase · Codes are single-device</div>
+      <div class="gate-demo-note">Want to see the full tool? <span class="gate-demo-link" onclick="unlockTool()">Click here for a preview demo</span></div>
+      <div id="gate-error" style="color:var(--ma-cran);font-size:0.82rem;margin-top:10px;display:none;">Invalid code. Please check your email and try again.</div>
+    </div>
+    <div id="tool-embed">
+      <div style="background:var(--ma-navy);padding:12px 24px;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-family:var(--heading);font-size:1rem;letter-spacing:2px;color:#fff;">🏗️ FULL 2A-1C STUDY TOOL</span>
+        <span style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.5);letter-spacing:1px;">FULL ACCESS UNLOCKED ✓</span>
+      </div>
+      <iframe id="tool-iframe" src="2A1C_Study_Tool.html" title="2A-1C Hoisting License Study Tool"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">Hoisting<span>ExamPrep</span></div>
+      <p style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-top:4px;">Massachusetts 2A-1C Hoisting License Study Tool</p>
+    </div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#sample">Free Quiz</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#topics">Topics</a>
+      <a href="mailto:lussierservicesllc@gmail.com">Contact</a>
+    </div>
+  </div>
+  <div class="footer-inner" style="padding-top:16px;">
+    <p class="footer-copy">© 2025 HoistingExamPrep · Not affiliated with the Massachusetts Board of Boiler Rules or the Department of Public Safety · Study content is based on MGL Chapter 146, 230 CMR 6, and OSHA regulations.</p>
+  </div>
+</footer>
+<div class="ma-seal-bar">
+  <p>Content based on Massachusetts General Laws Chapter 146 · 230 CMR 6 · OSHA 29 CFR 1926 Subpart P · ASME B30.5</p>
+</div>
+
+<script>
+// ── HEADER CODE CHECK ──
+function headerCheckCode(){
+  var code = document.getElementById('header-code-input').value.trim().toUpperCase();
+  if(!code) return;
+  var inp = document.getElementById('header-code-input');
+  inp.style.borderColor = 'rgba(255,255,255,0.25)';
+
+  fetch('/.netlify/functions/validate-code', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.valid){
+      unlockTool();
+      // scroll down to the tool
+      setTimeout(function(){
+        document.getElementById('full-tool-section').scrollIntoView({behavior:'smooth'});
+      }, 200);
+    } else {
+      inp.style.borderColor = 'var(--ma-cran)';
+      inp.placeholder = 'Invalid code — try again';
+      inp.value = '';
+      setTimeout(function(){ inp.placeholder = 'Have a code? Enter here...'; inp.style.borderColor='rgba(255,255,255,0.25)'; }, 2500);
+    }
+  })
+  .catch(function(){
+    // fallback for local testing
+    var fallback = ['HOIST2025','DEMO-ACCESS','MA2A1C'];
+    var pattern = /^HOIST-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+    if(fallback.indexOf(code) !== -1 || pattern.test(code)){
+      unlockTool();
+      setTimeout(function(){ document.getElementById('full-tool-section').scrollIntoView({behavior:'smooth'}); }, 200);
+    } else {
+      inp.style.borderColor = 'var(--ma-cran)';
+      inp.placeholder = 'Invalid code — try again';
+      inp.value = '';
+      setTimeout(function(){ inp.placeholder = 'Have a code? Enter here...'; inp.style.borderColor='rgba(255,255,255,0.25)'; }, 2500);
+    }
+  });
+}
+
+// ── SCROLL HELPER (accounts for sticky header height) ──
+function scrollToSample() {
+  var el = document.getElementById('sample');
+  if (!el) return;
+  var headerH = document.querySelector('.site-header') ? document.querySelector('.site-header').offsetHeight : 68;
+  var top = el.getBoundingClientRect().top + window.pageYOffset - headerH - 16;
+  window.scrollTo({ top: top, behavior: 'smooth' });
+}
+
+// ── BUY MODAL ──
+// To connect Stripe: replace the mailto href in #buy-action-btn with your Stripe Payment Link URL
+// e.g. href="https://buy.stripe.com/your_payment_link"
+function openBuyModal() {
+  document.getElementById('buy-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeBuyModal() {
+  document.getElementById('buy-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeBuyModal();
+});
+
+// ── SAMPLE QUIZ ──
+var sampleQs = [
+  { cat:"MGL CH. 146 § 57", q:"After a crane accident involving serious injury, within how many hours must it be reported to the Board of Boiler Rules?", opts:["12 hours","24 hours","48 hours","72 hours"], ans:1, exp:"MGL Ch. 146 § 57 requires reporting within 24 hours. Both the operator AND the owner/employer must independently file a report." },
+  { cat:"230 CMR 6", q:"What is the minimum clearance required between hoisting equipment and energized power lines rated up to 50kV?", opts:["5 feet","10 feet","15 feet","20 feet"], ans:1, exp:"230 CMR 6.08 requires a minimum of 10 feet from energized lines up to 50kV. This is the #1 most tested number on the 2A-1C exam." },
+  { cat:"HAND SIGNALS", q:"During a crane lift, a bystander spots a hazard near a worker. Who is allowed to give the STOP signal?", opts:["Only the designated signalperson","Only the foreman","Only the crane operator","Anyone on site"], ans:3, exp:"Anyone on site may give the STOP or Emergency STOP signal — the operator must obey immediately. Only the designated signalperson gives all other signals." },
+  { cat:"DIGSAFE", q:"What color markings indicate the location of gas, oil, or petroleum pipelines?", opts:["Red","Orange","Yellow","Blue"], ans:2, exp:"Yellow = gas, oil, steam, petroleum. Red = electric power. Orange = telecom/signal. Blue = potable water." },
+  { cat:"RIGGING", q:"When using a choker hitch, what percentage of the sling's rated capacity should you apply?", opts:["100%","90%","75%","50%"], ans:2, exp:"A choker hitch reduces rated capacity to 75%. Always de-rate when rigging with a choker. This is a very common exam question." },
+];
+
+var sqIdx = 0, sqScore = 0, sqAnswered = false;
+
+function sqRender(){
+  sqAnswered = false;
+  var q = sampleQs[sqIdx];
+  document.getElementById('sq-counter').textContent = 'QUESTION '+(sqIdx+1)+' OF 5';
+  document.getElementById('sq-prog').style.width = ((sqIdx+1)/5*100)+'%';
+  document.getElementById('sq-cat').textContent = q.cat;
+  document.getElementById('sq-q').textContent = q.q;
+  document.getElementById('sq-exp').className = 'quiz-exp';
+  document.getElementById('sq-exp').innerHTML = '';
+  document.getElementById('sq-next').className = 'quiz-next';
+
+  var optsHtml = '';
+  q.opts.forEach(function(o,i){
+    optsHtml += '<button class="quiz-opt" id="sq-opt-'+i+'" onclick="sqCheck('+i+')">'
+      + String.fromCharCode(65+i)+'. '+o+'</button>';
+  });
+  document.getElementById('sq-opts').innerHTML = optsHtml;
+}
+
+function sqCheck(idx){
+  if(sqAnswered) return;
+  sqAnswered = true;
+  var q = sampleQs[sqIdx];
+  for(var i=0;i<4;i++){
+    var b = document.getElementById('sq-opt-'+i);
+    if(b) b.disabled = true;
+  }
+  var correct = idx === q.ans;
+  document.getElementById('sq-opt-'+q.ans).classList.add('correct');
+  if(!correct) document.getElementById('sq-opt-'+idx).classList.add('wrong');
+  if(correct) sqScore++;
+  var exp = document.getElementById('sq-exp');
+  exp.innerHTML = '<strong>'+(correct?'✅ Correct!':'❌ Incorrect.')+' </strong>'+q.exp;
+  exp.className = 'quiz-exp show';
+  document.getElementById('sq-next').className = 'quiz-next show';
+}
+
+function sqNext(){
+  sqIdx++;
+  if(sqIdx >= sampleQs.length){
+    document.getElementById('sq-quiz-body').style.display='none';
+    var sc = document.getElementById('sq-score');
+    sc.className='quiz-score-screen show';
+    var pct = Math.round(sqScore/sampleQs.length*100);
+    document.getElementById('sq-score-num').textContent = sqScore+'/5';
+    document.getElementById('sq-score-msg').textContent = pct>=80
+      ? "🎉 Great start! You're ready to take on the full tool."
+      : pct>=60 ? "📚 Solid effort — the full tool will sharpen the rest."
+      : "💪 More practice needed — the full tool covers every topic in depth.";
+  } else {
+    sqRender();
+  }
+}
+
+function sqRestart(){
+  sqIdx=0; sqScore=0; sqAnswered=false;
+  // shuffle
+  for(var i=sampleQs.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=sampleQs[i];sampleQs[i]=sampleQs[j];sampleQs[j]=tmp;
+  }
+  document.getElementById('sq-quiz-body').style.display='block';
+  document.getElementById('sq-score').className='quiz-score-screen';
+  sqRender();
+}
+
+// ── GATE / UNLOCK ──
+function checkCode(){
+  var code = document.getElementById('gate-input').value.trim().toUpperCase();
+  var btn = document.querySelector('.gate-btn');
+  btn.textContent = 'Checking...';
+  btn.disabled = true;
+
+  fetch('/.netlify/functions/validate-code', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    btn.textContent = 'Unlock';
+    btn.disabled = false;
+    if(data.valid){
+      unlockTool();
+    } else {
+      document.getElementById('gate-error').style.display='block';
+      document.getElementById('gate-input').style.borderColor='var(--ma-cran)';
+    }
+  })
+  .catch(function(){
+    // Fallback: check hardcoded codes if function unreachable (local dev)
+    btn.textContent = 'Unlock';
+    btn.disabled = false;
+    var fallback = ['HOIST2025','DEMO-ACCESS','MA2A1C'];
+    var pattern = /^HOIST-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+    if(fallback.indexOf(code) !== -1 || pattern.test(code)){
+      unlockTool();
+    } else {
+      document.getElementById('gate-error').style.display='block';
+      document.getElementById('gate-input').style.borderColor='var(--ma-cran)';
+    }
+  });
+}
+
+function unlockTool(){
+  document.getElementById('gate-wrap').style.display='none';
+  document.getElementById('tool-embed').style.display='block';
+  document.getElementById('tool-iframe').src='2A1C_Study_Tool.html';
+  // scroll to tool
+  setTimeout(function(){
+    document.getElementById('full-tool-section').scrollIntoView({behavior:'smooth'});
+  }, 100);
+}
+
+// Enter key on gate input
+document.addEventListener('DOMContentLoaded', function(){
+  sqRender();
+  var inp = document.getElementById('gate-input');
+  if(inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') checkCode(); });
+});
+</script>
+
+</body>
+</html>

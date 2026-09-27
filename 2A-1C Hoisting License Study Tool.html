@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>2A-1C Hoisting License Study Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0d0f14; --surface:#161a22; --surface2:#1e2430; --border:#2a3040;
+  --accent:#f5a623; --accent2:#e85d26; --green:#2ecc71; --red:#e74c3c;
+  --blue:#3b9eff; --text:#e8ecf4; --muted:#6b7a94;
+  --heading:'Bebas Neue',sans-serif; --body:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d0f14,#1a1f2e);border-bottom:2px solid var(--accent);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.header-left{display:flex;align-items:center;gap:16px;}
+.crane-icon{font-size:2.2rem;filter:drop-shadow(0 0 10px var(--accent));}
+header h1{font-family:var(--heading);font-size:2rem;letter-spacing:3px;color:var(--accent);line-height:1;}
+header p{font-size:0.7rem;color:var(--muted);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+
+/* PROGRESS RING in header */
+.prog-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.prog-ring-wrap:hover .ring-circle{stroke:var(--accent);}
+.ring-label{font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.ring-pct{font-family:var(--heading);font-size:1rem;color:var(--accent);letter-spacing:1px;}
+svg.ring{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:4;}
+.ring-circle{fill:none;stroke:var(--accent2);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 0.6s ease;}
+
+/* NAV */
+nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.tab{padding:13px 20px;font-family:var(--mono);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.2s;background:none;border-top:none;border-left:none;border-right:none;}
+.tab:hover{color:var(--text);background:var(--surface2);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* PROGRESS DASHBOARD MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:var(--heading);font-size:1.8rem;letter-spacing:3px;color:var(--accent);margin-bottom:6px;}
+.modal-sub{font-family:var(--mono);font-size:0.68rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;}
+.stat-num{font-family:var(--heading);font-size:2rem;color:var(--accent);letter-spacing:2px;}
+.stat-lbl{font-family:var(--mono);font-size:0.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+.cat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.cat-name{font-family:var(--mono);font-size:0.7rem;color:var(--text);width:160px;flex-shrink:0;text-transform:uppercase;letter-spacing:0.5px;}
+.cat-bar-wrap{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.cat-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width 0.5s ease;}
+.cat-pct{font-family:var(--mono);font-size:0.68rem;color:var(--muted);width:36px;text-align:right;}
+.close-modal{margin-top:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:10px 24px;font-family:var(--mono);font-size:0.7rem;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;}
+.close-modal:hover{color:var(--text);}
+.reset-btn{margin-top:8px;background:none;color:var(--red);border:1px solid var(--red);border-radius:6px;padding:8px 20px;font-family:var(--mono);font-size:0.65rem;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;opacity:0.7;}
+.reset-btn:hover{opacity:1;}
+
+/* MAIN */
+main{max-width:960px;margin:0 auto;padding:32px 24px;}
+.section{display:none;}
+.section.active{display:block;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:20px;}
+.card-title{font-family:var(--heading);font-size:1.4rem;letter-spacing:2px;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.tag{font-family:var(--mono);font-size:0.62rem;background:var(--accent2);color:#fff;padding:2px 8px;border-radius:3px;letter-spacing:1px;text-transform:uppercase;}
+.card p,.card li{font-size:0.91rem;line-height:1.75;color:#c8d0e0;}
+.card ul,.card ol{padding-left:20px;margin-top:8px;}
+.card li{margin-bottom:4px;}
+.law-ref{font-family:var(--mono);font-size:0.68rem;color:var(--muted);background:var(--surface2);padding:3px 8px;border-radius:3px;display:inline-block;margin-bottom:10px;}
+.highlight{color:var(--accent);font-weight:600;} .warn{color:var(--accent2);font-weight:600;} .good{color:var(--green);font-weight:600;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+
+/* ACCORDION */
+.accordion-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;}
+.accordion-header{padding:16px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background 0.2s;}
+.accordion-header:hover{background:var(--surface2);}
+.accordion-header h3{font-family:var(--heading);font-size:1.05rem;letter-spacing:1.5px;color:var(--text);}
+.accordion-header .section-ref{font-family:var(--mono);font-size:0.65rem;color:var(--accent);background:rgba(245,166,35,0.1);padding:2px 8px;border-radius:3px;margin-right:10px;white-space:nowrap;}
+.accordion-chevron{color:var(--muted);font-size:1rem;transition:transform 0.3s;flex-shrink:0;}
+.accordion-item.open .accordion-chevron{transform:rotate(180deg);}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease;}
+.accordion-item.open .accordion-body{max-height:1400px;}
+.accordion-content{padding:0 20px 20px;font-size:0.88rem;line-height:1.8;color:#c0cad8;}
+.accordion-content h4{color:var(--accent);font-family:var(--mono);font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;margin:14px 0 6px;}
+.accordion-content ul{padding-left:18px;}
+.accordion-content li{margin-bottom:5px;}
+.key-fact{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.3);border-radius:6px;padding:10px 14px;margin:10px 0;font-size:0.84rem;color:var(--accent);}
+.key-fact::before{content:"★  ";}
+
+/* BOOKMARK button */
+.bookmark-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:0.7rem;padding:3px 10px;cursor:pointer;font-family:var(--mono);letter-spacing:1px;transition:all 0.2s;margin-left:auto;}
+.bookmark-btn:hover,.bookmark-btn.saved{color:var(--accent);border-color:var(--accent);background:rgba(245,166,35,0.08);}
+
+/* ─── DIGSAFE FLASHCARDS ─── */
+.fc-controls{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.fc-mode-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:6px;font-family:var(--mono);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.fc-mode-btn.active,.fc-mode-btn:hover{border-color:var(--accent);color:var(--accent);}
+.fc-progress-text{font-family:var(--mono);font-size:0.68rem;color:var(--muted);margin-left:auto;}
+
+.flashcard-arena{display:flex;flex-direction:column;align-items:center;gap:20px;}
+.fc-card-wrap{width:100%;max-width:480px;perspective:1000px;cursor:pointer;}
+.fc-card{width:100%;min-height:240px;position:relative;transform-style:preserve-3d;transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);}
+.fc-card.flipped{transform:rotateY(180deg);}
+.fc-front,.fc-back{position:absolute;inset:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.fc-front{background:var(--surface);border:2px solid var(--border);}
+.fc-back{background:var(--surface2);transform:rotateY(180deg);}
+.fc-hint{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;}
+.fc-swatch{width:80px;height:80px;border-radius:50%;margin-bottom:16px;box-shadow:0 0 30px currentColor;}
+.fc-question{font-family:var(--heading);font-size:1.6rem;letter-spacing:2px;text-align:center;}
+.fc-utility{font-family:var(--heading);font-size:1.3rem;letter-spacing:1.5px;text-align:center;margin-top:8px;}
+.fc-color-name{font-family:var(--heading);font-size:2.2rem;letter-spacing:3px;margin-bottom:8px;}
+.fc-tap{font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;position:absolute;bottom:14px;}
+
+.fc-nav{display:flex;gap:12px;align-items:center;}
+.fc-nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:44px;height:44px;border-radius:50%;font-size:1.1rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
+.fc-nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+.fc-counter{font-family:var(--heading);font-size:1.2rem;color:var(--muted);letter-spacing:2px;min-width:60px;text-align:center;}
+
+/* FC GUESS MODE */
+.fc-guess-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:480px;}
+.fc-guess-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 10px;font-family:var(--body);font-size:0.85rem;color:var(--text);cursor:pointer;transition:all 0.2s;text-align:left;line-height:1.4;}
+.fc-guess-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.fc-guess-btn.correct{background:rgba(46,204,113,0.15);border-color:var(--green);color:var(--green);}
+.fc-guess-btn.wrong{background:rgba(231,76,60,0.15);border-color:var(--red);color:var(--red);}
+.fc-guess-btn:disabled{cursor:default;}
+.fc-result{font-family:var(--mono);font-size:0.75rem;padding:10px 16px;border-radius:6px;margin-top:4px;text-align:center;}
+.fc-result.ok{background:rgba(46,204,113,0.1);color:var(--green);}
+.fc-result.no{background:rgba(231,76,60,0.1);color:var(--red);}
+
+/* ─── HAND SIGNAL GAME ─── */
+.sig-game-wrap{max-width:560px;margin:0 auto;}
+.sig-tabs{display:flex;gap:10px;margin-bottom:20px;}
+.sig-tab-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:8px 18px;border-radius:6px;font-family:var(--mono);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.sig-tab-btn.active,.sig-tab-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Browse mode */
+.signals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:4px;}
+.signal-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:18px 14px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
+.signal-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,166,35,0.12);}
+.signal-card .sig-svg{display:block;margin:0 auto 8px;opacity:0.92;}
+.signal-card:hover .sig-svg{opacity:1;}
+.signal-card .sig-name{font-family:var(--heading);font-size:1.05rem;letter-spacing:1.5px;color:var(--accent);}
+.signal-card .sig-desc{font-size:0.78rem;color:var(--muted);margin-top:4px;line-height:1.5;}
+.signal-card .sig-detail{max-height:0;overflow:hidden;transition:max-height 0.3s ease;font-size:0.76rem;color:var(--blue);margin-top:0;}
+.signal-card.open .sig-detail{max-height:120px;margin-top:8px;}
+.signal-card.open{border-color:var(--blue);}
+.sig-svg-big{display:block;margin:0 auto;}
+
+/* Quiz game mode */
+.sig-quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;text-align:center;margin-bottom:16px;}
+.sig-emoji-big{font-size:5rem;display:block;margin-bottom:16px;}
+.sig-q-text{font-family:var(--heading);font-size:1.3rem;letter-spacing:2px;color:var(--text);margin-bottom:4px;}
+.sig-q-sub{font-size:0.82rem;color:var(--muted);margin-bottom:20px;}
+.sig-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sig-opt-btn{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:12px 10px;font-family:var(--body);font-size:0.84rem;color:var(--text);cursor:pointer;transition:all 0.2s;text-align:left;line-height:1.35;}
+.sig-opt-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.sig-opt-btn.correct{background:rgba(46,204,113,0.15);border-color:var(--green);color:var(--green);}
+.sig-opt-btn.wrong{background:rgba(231,76,60,0.15);border-color:var(--red);color:var(--red);}
+.sig-opt-btn:disabled{cursor:default;}
+.sig-streak{font-family:var(--mono);font-size:0.7rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;}
+.sig-streak span{color:var(--accent);font-size:0.9rem;}
+
+/* ─── QUIZ ─── */
+.quiz-wrap{max-width:680px;margin:0 auto;}
+.q-counter{font-family:var(--mono);font-size:0.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.q-score-live{color:var(--accent);}
+.q-progress{height:4px;background:var(--border);border-radius:2px;margin-bottom:24px;overflow:hidden;}
+.q-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:2px;transition:width 0.5s ease;}
+.question-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:26px;margin-bottom:12px;}
+.question-text{font-size:1.02rem;line-height:1.65;color:var(--text);margin-bottom:22px;}
+.q-category{font-family:var(--mono);font-size:0.62rem;color:var(--accent2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.answer-btn{display:block;width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:9px;color:var(--text);font-family:var(--body);font-size:0.88rem;cursor:pointer;transition:all 0.15s;line-height:1.4;}
+.answer-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.answer-btn.correct{background:rgba(46,204,113,0.15);border-color:var(--green);color:var(--green);}
+.answer-btn.wrong{background:rgba(231,76,60,0.15);border-color:var(--red);color:var(--red);}
+.answer-btn:disabled{cursor:default;}
+.explanation{background:var(--surface2);border-left:3px solid var(--blue);padding:13px 16px;border-radius:0 6px 6px 0;font-size:0.86rem;line-height:1.65;color:#b0bcd4;margin-top:4px;display:none;}
+.explanation.show{display:block;animation:fadeIn 0.2s ease;}
+.next-btn{background:var(--accent);color:#000;border:none;border-radius:6px;padding:11px 30px;font-family:var(--heading);font-size:0.95rem;letter-spacing:2px;cursor:pointer;margin-top:14px;transition:all 0.2s;display:none;}
+.next-btn:hover{background:#ffbc45;transform:translateY(-1px);}
+.next-btn.show{display:inline-block;}
+
+/* Quiz results */
+.score-box{text-align:center;padding:40px 24px;display:none;}
+.score-box.show{display:block;animation:fadeIn 0.4s ease;}
+.score-num{font-family:var(--heading);font-size:4.5rem;color:var(--accent);letter-spacing:4px;}
+.score-label{font-family:var(--mono);font-size:0.76rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.score-msg{font-size:1rem;color:var(--text);margin:14px 0 24px;}
+.cat-breakdown{text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:24px;}
+.cat-breakdown h4{font-family:var(--mono);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.restart-btn{background:var(--surface2);color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:11px 26px;font-family:var(--heading);font-size:0.95rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s;}
+.restart-btn:hover{background:var(--accent);color:#000;}
+
+/* ACCIDENT SCENE */
+.authority-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:8px;}
+.authority-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:17px;}
+.authority-card .who{font-family:var(--heading);font-size:0.95rem;letter-spacing:1.5px;color:var(--accent);margin-bottom:6px;}
+.authority-card .what{font-size:0.83rem;line-height:1.6;color:#b0bcd4;}
+.badge{display:inline-block;font-family:var(--mono);font-size:0.58rem;letter-spacing:1px;padding:2px 7px;border-radius:3px;text-transform:uppercase;margin-left:6px;vertical-align:middle;}
+.badge-release{background:rgba(46,204,113,0.2);color:var(--green);border:1px solid var(--green);}
+.badge-scene{background:rgba(59,158,255,0.2);color:var(--blue);border:1px solid var(--blue);}
+.badge-authority{background:rgba(232,93,38,0.2);color:var(--accent2);border:1px solid var(--accent2);}
+
+/* CHEAT SHEET */
+.cheat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:16px;margin-top:4px;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+@media(max-width:600px){
+  header{padding:14px 16px;}header h1{font-size:1.4rem;}
+  .signals-grid{grid-template-columns:1fr 1fr;}
+  .sig-opts,.fc-guess-grid{grid-template-columns:1fr;}
+  main{padding:20px 12px;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS MODAL -->
+<div class="modal-overlay" id="prog-modal" onclick="if(event.target===this)closeProg()">
+  <div class="modal">
+    <div class="modal-title">YOUR PROGRESS</div>
+    <div class="modal-sub">Tracked across all sessions on this device</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" id="p-total-q">0</div><div class="stat-lbl">Questions Answered</div></div>
+      <div class="stat-box"><div class="stat-num" id="p-correct">0</div><div class="stat-lbl">Correct Answers</div></div>
+      <div class="stat-box"><div class="stat-num" id="p-streak">0</div><div class="stat-lbl">Best Streak</div></div>
+      <div class="stat-box"><div class="stat-num" id="p-sessions">0</div><div class="stat-lbl">Study Sessions</div></div>
+    </div>
+    <div style="margin-bottom:8px;font-family:var(--mono);font-size:0.68rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;">Score by Topic</div>
+    <div id="cat-bars"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button class="close-modal" onclick="closeProg()">Close</button>
+      <button class="reset-btn" onclick="resetProgress()">Reset All Progress</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="header-left">
+    <span class="crane-icon">🏗️</span>
+    <div>
+      <h1>2A-1C Hoisting</h1>
+      <p>MA Exam Study Tool · MGL Ch.146 · 230 CMR 6</p>
+    </div>
+  </div>
+  <div class="prog-ring-wrap" onclick="openProg()" title="View Progress">
+    <svg class="ring" width="52" height="52" viewBox="0 0 52 52">
+      <circle class="ring-bg" cx="26" cy="26" r="22"/>
+      <circle class="ring-circle" id="ring-circle" cx="26" cy="26" r="22" stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+    </svg>
+    <div style="position:absolute;margin-top:-4px;">
+      <div class="ring-pct" id="ring-pct" style="text-align:center;font-size:0.75rem;">0%</div>
+    </div>
+    <div class="ring-label">Progress</div>
+  </div>
+</header>
+
+<nav>
+  <button class="tab active" onclick="showSection('law',this)">📋 Law</button>
+  <button class="tab" onclick="showSection('signals',this)">🤚 Signals</button>
+  <button class="tab" onclick="showSection('digsafe',this)">🎨 DigSafe</button>
+  <button class="tab" onclick="showSection('accident',this)">🚨 Accidents</button>
+  <button class="tab" onclick="showSection('rigging',this)">🪝 Rigging</button>
+  <button class="tab" onclick="showSection('excavation',this)">⛏️ Excavation</button>
+  <button class="tab" onclick="showSection('forklifts',this)">🚜 Forklifts</button>
+  <button class="tab" onclick="showSection('quiz',this)">📝 Quiz</button>
+  <button class="tab" onclick="showSection('cheatsheet',this)">⚡ Quick Ref</button>
+</nav>
+
+<main>
+
+<!-- ═══ LAW SECTIONS ═══ -->
+<section id="law" class="section active">
+  <div class="card" style="background:linear-gradient(135deg,#1a1f2e,#161a22);border-color:#2a3040;margin-bottom:24px;">
+    <div class="card-title">MGL Chapter 146 &amp; 230 CMR 6 <span class="tag">2A-1C Scope</span></div>
+    <p>Chapter 146 is Massachusetts' Boiler, Pressure Vessel &amp; Hoisting Machinery law. 230 CMR 6 is the Board of Boiler Rules' implementing regulation. Click any section to expand. <strong>Bookmark key facts</strong> to review later.</p>
+  </div>
+  <div id="bookmarks-bar" style="display:none;background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.25);border-radius:8px;padding:14px 18px;margin-bottom:16px;">
+    <div style="font-family:var(--mono);font-size:0.65rem;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">★ Bookmarked Facts</div>
+    <div id="bookmarks-list" style="font-size:0.85rem;line-height:1.8;color:#c8d0e0;"></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header">
+      <div style="display:flex;align-items:center;flex:1;">
+        <span class="section-ref">§ 53</span>
+        <h3>License Required to Operate Hoisting Machinery</h3>
+      </div>
+      <span class="accordion-chevron">▼</span>
+    </div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>Core Rule</h4>
+      <p>No person shall operate any hoisting machinery in Massachusetts without a valid license issued by the Board of Boiler Rules unless expressly exempt. Must carry license on person and produce it on demand.</p>
+
+      <div class="key-fact">⚠️ NOTE ON CRANES: Crane operation is a separate license class with additional requirements beyond the scope of this study tool. This tool covers the <strong>2A hoisting license</strong> and general hoisting equipment only. For crane licensing requirements contact the Board of Boiler Rules at <strong>617-727-9640</strong>. <button class="bookmark-btn" onclick="event.stopPropagation();bookmarkFact(this)" data-fact="Crane operation is a separate license class beyond the scope of this tool. Contact Board of Boiler Rules: 617-727-9640.">☆ Bookmark</button></div>
+
+      <h4>What You Can Operate with a 2A License</h4>
+      <ul>
+        <li>Excavators / backhoes</li>
+        <li>Bulldozers</li>
+        <li>Scrapers</li>
+        <li>Graders</li>
+        <li>Trenching machines</li>
+        <li>Hydraulic hammers / breakers</li>
+        <li>Skid steers over 10,000 lbs</li>
+        <li>Large loaders over 10,000 lbs</li>
+        <li>Draglines</li>
+        <li>Clamshells</li>
+        <li>Any hoisting machinery over 10,000 lbs not otherwise classified</li>
+      </ul>
+
+      <h4>License Classes Summary</h4>
+      <ul>
+        <li><strong>2A</strong> – Hoisting equipment &gt;10,000 lb (this tool)</li>
+        <li><strong>2B</strong> – Hoisting up to 10,000 lb</li>
+        <li><strong>4D</strong> – Forklifts</li>
+        <li><strong>Crane classes</strong> – Separate licensing — beyond scope of this tool</li>
+      </ul>
+
+      <h4>Exemptions</h4>
+      <ul>
+        <li>Elevator operators (separate statute)</li>
+        <li>Farmer on own land only</li>
+        <li>Residential garden/landscaping only</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header">
+      <div style="display:flex;align-items:center;flex:1;">
+        <span class="section-ref">§ 53A</span>
+        <h3>Board of Boiler Rules — Authority &amp; Composition</h3>
+      </div>
+      <span class="accordion-chevron">▼</span>
+    </div>
+    <div class="accordion-body"><div class="accordion-content">
+      <p>The <strong>Board of Boiler Rules</strong> (Dept. of Public Safety) administers hoisting licenses. It sets rules, holds hearings, issues/suspends/revokes licenses, and appoints Hoisting Inspectors.</p>
+      <div class="key-fact" data-fact="§53A: Board of Boiler Rules issues licenses. Inspectors can stop work, cite violations, and order equipment removed from service.">§53A: Board of Boiler Rules issues licenses. Inspectors can stop work, cite violations, and order equipment out of service. <button class="bookmark-btn" onclick="event.stopPropagation();bookmarkFact(this)" data-fact="§53A: Board of Boiler Rules issues licenses. Inspectors can stop work, cite violations, order equipment removed.">☆ Bookmark</button></div>
+      <h4>Inspectors</h4>
+      <ul>
+        <li>Appointed by the Board</li>
+        <li>Authority to stop work, issue citations, order equipment removed from service</li>
+        <li>Operator must comply immediately with a lawful inspector order</li>
+        <li>Fines up to $1,000 per day per violation</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header">
+      <div style="display:flex;align-items:center;flex:1;">
+        <span class="section-ref">§ 54A</span>
+        <h3>Examination &amp; Licensing Requirements</h3>
+      </div>
+      <span class="accordion-chevron">▼</span>
+    </div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>Eligibility</h4>
+      <ul>
+        <li>Must be at least <strong>18 years old</strong></li>
+        <li>Must pass written Board examination</li>
+        <li>Practical competency demonstration for some classes</li>
+      </ul>
+      <div class="key-fact">License term = <strong>3 years</strong>. Expired license = same as NO license. <button class="bookmark-btn" onclick="event.stopPropagation();bookmarkFact(this)" data-fact="§54A: License term = 3 years. Expired = same offense as no license. Min age = 18.">☆ Bookmark</button></div>
+      <h4>Endorsements</h4>
+      <ul>
+        <li>2A base + 1C endorsement required for crane operation</li>
+        <li>Each endorsement may require separate testing</li>
+        <li>Renewal: 3-year cycle, fee + continued compliance</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header">
+      <div style="display:flex;align-items:center;flex:1;">
+        <span class="section-ref">§ 57</span>
+        <h3>Accidents — Reporting Requirements</h3>
+      </div>
+      <span class="accordion-chevron">▼</span>
+    </div>
+    <div class="accordion-body"><div class="accordion-content">
+      <div class="key-fact">§57: Report within <strong>24 hours</strong>. BOTH operator AND owner/employer must report. Covers death, serious injury, OR substantial property damage. <button class="bookmark-btn" onclick="event.stopPropagation();bookmarkFact(this)" data-fact="§57: Accident report = 24 hours. Both operator AND owner/employer must report. Property damage counts too.">☆ Bookmark</button></div>
+      <h4>Scene Preservation</h4>
+      <ul>
+        <li>Equipment must NOT be moved until released by proper authority</li>
+        <li>Tampering before release = separate criminal offense</li>
+        <li>Board Inspector investigates and releases hoisting equipment</li>
+      </ul>
+      <h4>Inspector's Role at Scene</h4>
+      <ul>
+        <li>May impound equipment and gather evidence</li>
+        <li>May prohibit further operation pending investigation</li>
+        <li>Failure to report = separate, additional violation</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header">
+      <div style="display:flex;align-items:center;flex:1;">
+        <span class="section-ref">§ 65</span>
+        <h3>Penalties &amp; Violations</h3>
+      </div>
+      <span class="accordion-chevron">▼</span>
+    </div>
+    <div class="accordion-body"><div class="accordion-content">
+      <div class="key-fact">§65: Operating without license = up to <strong>$1,000 fine AND/OR 1 year imprisonment PER DAY</strong>. Employer who knowingly hires unlicensed operator faces same penalties. <button class="bookmark-btn" onclick="event.stopPropagation();bookmarkFact(this)" data-fact="§65: No license = $1,000 + 1yr jail PER DAY. Employer same liability. Each day = separate offense.">☆ Bookmark</button></div>
+      <h4>Common Exam Violations</h4>
+      <ul>
+        <li>Operating while impaired → automatic suspension</li>
+        <li>Refusing to submit to inspection</li>
+        <li>Failure to report accident within 24 hours</li>
+        <li>Moving equipment from accident scene without authorization</li>
+        <li>Operating beyond rated capacity</li>
+        <li>Felony conviction → possible automatic revocation</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header">
+      <div style="display:flex;align-items:center;flex:1;">
+        <span class="section-ref">230 CMR 6</span>
+        <h3>Hoisting Machinery Regulations — Key Rules</h3>
+      </div>
+      <span class="accordion-chevron">▼</span>
+    </div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>Operator Duties (6.05)</h4>
+      <ul>
+        <li>Pre-shift inspection required before use — document defects</li>
+        <li>Tag out defective equipment immediately</li>
+        <li>Absolute right to refuse unsafe equipment — cannot be punished</li>
+        <li>Must know rated capacity at all times</li>
+      </ul>
+      <div class="key-fact">230 CMR: Operator has absolute right to refuse unsafe equipment. Cannot be fired or disciplined. <button class="bookmark-btn" onclick="event.stopPropagation();bookmarkFact(this)" data-fact="230 CMR 6.05: Absolute right to refuse unsafe equipment. Cannot be fired/disciplined for refusal.">☆ Bookmark</button></div>
+      <h4>Signalperson (6.05)</h4>
+      <ul>
+        <li>Required when operator can't see load or landing zone</li>
+        <li>Only ONE designated signalperson at a time</li>
+        <li>ANYONE may give STOP/Emergency Stop</li>
+      </ul>
+      <h4>Power Lines (6.08)</h4>
+      <div class="key-fact">Minimum <strong>10 feet</strong> clearance from energized lines up to 50kV. Add 1 inch per kV above 50kV. <button class="bookmark-btn" onclick="event.stopPropagation();bookmarkFact(this)" data-fact="230 CMR 6.08: 10-foot minimum clearance from power lines up to 50kV. #1 most tested number.">☆ Bookmark</button></div>
+      <h4>Outriggers (6.06)</h4>
+      <ul>
+        <li>Fully extended and set before any lift unless load chart says otherwise</li>
+        <li>Assess ground conditions — mats/blocking on soft ground</li>
+      </ul>
+      <h4>Load Charts</h4>
+      <ul>
+        <li>Must be physically in the cab and legible — not memorized</li>
+        <li>Workers never allowed under a suspended load</li>
+        <li>Taglines required to control swinging loads</li>
+      </ul>
+    </div></div>
+  </div>
+</section>
+
+<!-- ═══ HAND SIGNALS ═══ -->
+<section id="signals" class="section">
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">Standard Crane Hand Signals <span class="tag">ASME B30.5</span></div>
+    <p>Massachusetts 230 CMR references ASME standard signals. Switch between <strong>Browse</strong> (tap to expand details) and <strong>Quiz Mode</strong> (test yourself). <span class="warn">ANYONE can give STOP — only the designated signalperson gives all other signals.</span></p>
+  </div>
+  <div class="sig-tabs">
+    <button class="sig-tab-btn active" id="sig-browse-btn" onclick="setSigMode('browse')">📖 Browse</button>
+    <button class="sig-tab-btn" id="sig-quiz-btn" onclick="setSigMode('quiz')">🎯 Quiz Mode</button>
+  </div>
+
+  <div id="sig-browse">
+    <div class="signals-grid" id="signals-grid"></div>
+  </div>
+
+  <div id="sig-quiz" style="display:none;">
+    <div class="sig-game-wrap">
+      <div class="sig-streak">Streak: <span id="sig-streak">0</span> &nbsp;|&nbsp; Score: <span id="sig-score">0</span>/<span id="sig-total">0</span></div>
+      <div class="sig-quiz-card" id="sig-quiz-card">
+        <div class="sig-svg-big" id="sig-emoji"></div>
+        <div class="sig-q-text">What signal is this?</div>
+        <div class="sig-q-sub" id="sig-q-sub">Tap an answer</div>
+      </div>
+      <div class="sig-opts" id="sig-opts"></div>
+      <div id="sig-feedback" style="margin-top:10px;"></div>
+      <button class="next-btn show" id="sig-next" onclick="nextSigQ()" style="margin-top:14px;display:none;">NEXT →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DIGSAFE FLASHCARDS ═══ -->
+<section id="digsafe" class="section">
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">DigSafe Color Codes <span class="tag">APWA Standard</span></div>
+    <p>Call <strong style="color:var(--accent)">811</strong> at least <strong>72 hours</strong> before excavating (excluding weekends/holidays). Fines up to <strong>$10,000</strong> per incident for skipping DigSafe.</p>
+  </div>
+  <div class="fc-controls">
+    <button class="fc-mode-btn active" id="fc-flip-btn" onclick="setFCMode('flip')">🃏 Flip Cards</button>
+    <button class="fc-mode-btn" id="fc-guess-btn" onclick="setFCMode('guess')">🎯 Guess the Color</button>
+    <button class="fc-mode-btn" id="fc-guess2-btn" onclick="setFCMode('guess2')">🔄 Guess the Utility</button>
+    <span class="fc-progress-text" id="fc-prog-text">Card 1 of 8</span>
+  </div>
+
+  <!-- FLIP MODE -->
+  <div id="fc-flip-mode" class="flashcard-arena">
+    <div class="fc-card-wrap" onclick="flipCard()">
+      <div class="fc-card" id="fc-card">
+        <div class="fc-front">
+          <div class="fc-hint">What utility is this?</div>
+          <div class="fc-swatch" id="fc-swatch-front"></div>
+          <div class="fc-color-name" id="fc-color-front"></div>
+          <div class="fc-tap">TAP TO REVEAL</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-hint">Utility / Use</div>
+          <div class="fc-utility" id="fc-utility-back" style="color:var(--accent)"></div>
+          <div class="fc-swatch" id="fc-swatch-back" style="margin-top:14px;width:44px;height:44px;"></div>
+          <div class="fc-tap">TAP TO FLIP BACK</div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-nav">
+      <button class="fc-nav-btn" onclick="fcNav(-1)">←</button>
+      <div class="fc-counter" id="fc-counter">1/8</div>
+      <button class="fc-nav-btn" onclick="fcNav(1)">→</button>
+    </div>
+  </div>
+
+  <!-- GUESS COLOR MODE -->
+  <div id="fc-guess-mode" style="display:none;" class="flashcard-arena">
+    <div class="fc-card-wrap" style="cursor:default;">
+      <div class="fc-card" style="transform:none !important;">
+        <div class="fc-front" style="position:relative;min-height:200px;border-radius:12px;">
+          <div class="fc-hint">What COLOR marks this utility?</div>
+          <div class="fc-utility" id="fc-g-utility" style="font-size:1.1rem;color:var(--text);text-align:center;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-guess-grid" id="fc-guess-grid"></div>
+    <div id="fc-guess-result" class="fc-result" style="display:none;"></div>
+    <button class="next-btn" id="fc-guess-next" onclick="nextGuess()" style="margin-top:12px;display:none;">NEXT →</button>
+    <div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-top:8px;" id="fc-guess-score">Score: 0/0</div>
+  </div>
+
+  <!-- GUESS UTILITY MODE -->
+  <div id="fc-guess2-mode" style="display:none;" class="flashcard-arena">
+    <div class="fc-card-wrap" style="cursor:default;">
+      <div class="fc-card" style="transform:none !important;">
+        <div class="fc-front" style="position:relative;min-height:200px;border-radius:12px;">
+          <div class="fc-hint">What utility does this color mark?</div>
+          <div class="fc-swatch" id="fc-g2-swatch"></div>
+          <div class="fc-color-name" id="fc-g2-color" style="font-size:1.6rem;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-guess-grid" id="fc-guess2-grid"></div>
+    <div id="fc-guess2-result" class="fc-result" style="display:none;"></div>
+    <button class="next-btn" id="fc-guess2-next" onclick="nextGuess2()" style="margin-top:12px;display:none;">NEXT →</button>
+    <div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-top:8px;" id="fc-guess2-score">Score: 0/0</div>
+  </div>
+</section>
+
+<!-- ═══ ACCIDENT SCENE ═══ -->
+<section id="accident" class="section">
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">🚨 Accident Scene — Who Can Release It?</div>
+    <p>Equipment involved in a serious accident <strong>must NOT be moved</strong> until officially released. <span class="warn">ALL applicable authorities must release before work resumes.</span> The employer has zero authority here.</p>
+  </div>
+  <div class="authority-grid">
+    <div class="authority-card">
+      <div class="who">Board of Boiler Rules Inspector <span class="badge badge-release">Can Release</span></div>
+      <div class="what">Primary authority under MGL Ch. 146. Must investigate and formally release hoisting equipment before it moves. <strong>Most important for your exam.</strong></div>
+    </div>
+    <div class="authority-card">
+      <div class="who">State Police / Local Police <span class="badge badge-scene">Scene Control</span></div>
+      <div class="what">Controls access to the scene for safety and criminal investigation. Their release of the scene ≠ equipment is cleared. Board Inspector must also clear the equipment specifically.</div>
+    </div>
+    <div class="authority-card">
+      <div class="who">OSHA Inspector <span class="badge badge-authority">Federal Auth.</span></div>
+      <div class="what">On federal projects or where OSHA jurisdiction applies, an OSHA officer may need to clear equipment too. Runs parallel to, not instead of, the Board of Boiler Rules.</div>
+    </div>
+    <div class="authority-card">
+      <div class="who">Medical Examiner <span class="badge badge-scene">Fatality Only</span></div>
+      <div class="what">In a fatal accident, the ME must be notified and may examine the scene before anything moves. Required for the scene — not specific to the equipment.</div>
+    </div>
+    <div class="authority-card">
+      <div class="who">DA / State Police Detectives <span class="badge badge-scene">Criminal Inv.</span></div>
+      <div class="what">If criminal liability is possible (manslaughter, negligence), detectives may hold scene jurisdiction. Their release may be required before work resumes.</div>
+    </div>
+    <div class="authority-card" style="border-color:var(--accent2);">
+      <div class="who" style="color:var(--accent2);">Employer / Foreman / Owner ✗ NO</div>
+      <div class="what">These parties <strong>cannot</strong> release the accident scene or clear equipment. An employer ordering a move before official release is committing a separate violation and exposing all parties to liability.</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:20px;border-color:var(--accent2);">
+    <div class="card-title" style="color:var(--accent2);">🔑 Exam Key Points — Accidents</div>
+    <ul style="padding-left:18px;font-size:0.88rem;line-height:1.95;color:#c0cad8;">
+      <li>Report to Board of Boiler Rules within <strong>24 hours</strong></li>
+      <li>Both <strong>operator AND owner/employer</strong> must independently report</li>
+      <li>Equipment must <strong>NOT be moved</strong> without Board Inspector release</li>
+      <li>Employer <strong>cannot</strong> authorize equipment to move</li>
+      <li>Moving without authorization = criminal offense + license risk</li>
+      <li>All applicable agencies (Board, OSHA, police) must release before resuming</li>
+      <li>Failure to report = separate criminal offense on top of the accident</li>
+      <li>Property-damage-only accidents still trigger 24-hour report requirement</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ RIGGING ═══ -->
+<section id="rigging" class="section">
+  <div class="card" style="background:linear-gradient(135deg,#1a1f2e,#161a22);border-color:#2a3040;margin-bottom:24px;">
+    <div class="card-title">🪝 Rigging — Rules &amp; Requirements <span class="tag">230 CMR 6 / ASME B30</span></div>
+    <p>Rigging is the attachment of loads to hoisting equipment. Improper rigging is one of the leading causes of crane accidents. The 2A-1C exam heavily tests sling angles, inspection requirements, and load calculation.</p>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">SLINGS</span><h3>Sling Types &amp; Rating Rules</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>Types of Slings</h4>
+      <ul>
+        <li><strong>Wire rope slings</strong> — most common for heavy loads; inspect for broken wires, kinks, corrosion</li>
+        <li><strong>Chain slings</strong> — high strength, heat resistant; inspect for stretched, bent, or cracked links</li>
+        <li><strong>Synthetic web slings</strong> (nylon/polyester) — softer on loads; inspect for cuts, burns, UV damage</li>
+        <li><strong>Roundslings</strong> — polyester core with protective cover; inspect for cuts and core exposure</li>
+      </ul>
+      <h4>Sling Rejection Criteria — Remove from Service If:</h4>
+      <ul>
+        <li>Wire rope: <strong>10 broken wires in any rope lay</strong>, or 5 in one strand</li>
+        <li>Any kinking, crushing, bird-caging, or heat damage</li>
+        <li>Chain: any link stretched more than <strong>3%</strong> of original length</li>
+        <li>Synthetic: any cut, burn, knot, or chemical damage</li>
+        <li>Missing or illegible tag/identification</li>
+      </ul>
+      <div class="key-fact">EXAM KEY: A sling with no tag or an illegible tag must be removed from service immediately — you cannot use it even if it looks fine.</div>
+      <h4>Sling Angle Effect on Capacity</h4>
+      <p>As the angle between the sling and the horizontal decreases, the tension in each leg increases dramatically. This is the most math-heavy rigging concept on the exam.</p>
+      <ul>
+        <li><strong>90° (vertical)</strong> — full rated capacity per leg</li>
+        <li><strong>60°</strong> — each leg carries about <strong>115%</strong> of its share of the load</li>
+        <li><strong>45°</strong> — each leg carries about <strong>141%</strong> of its share</li>
+        <li><strong>30°</strong> — each leg carries <strong>200%</strong> — capacity is cut in half</li>
+      </ul>
+      <div class="key-fact">Never rig at an angle less than 30°. Below 30°, the sling legs are bearing more than double the load share — catastrophic failure risk.</div>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">HITCHES</span><h3>Hitch Configurations</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <ul>
+        <li><strong>Vertical (straight) hitch</strong> — one sling, vertical, direct pull. Full rated capacity. Load can spin.</li>
+        <li><strong>Choker hitch</strong> — sling loops around the load and chokes tight. Reduces rated capacity to <strong>75%</strong>. Controls load spinning.</li>
+        <li><strong>Basket hitch</strong> — sling under the load with both ends on the hook. Can double capacity if legs are vertical. Load can tip — use only on stable loads.</li>
+        <li><strong>Double wrap choker</strong> — wraps twice for better grip. Capacity slightly higher than single choker.</li>
+      </ul>
+      <div class="key-fact">Choker hitch = 75% of rated capacity. Always de-rate when using a choker. This is a very common exam question.</div>
+      <h4>Hardware</h4>
+      <ul>
+        <li><strong>Shackles</strong> — must be rated and pin must be moused (secured). Never replace a screw pin with a bolt.</li>
+        <li><strong>Hook</strong> — must have a safety latch. Latch must be functional. Never force a load into the tip of the hook (point loading).</li>
+        <li><strong>Rigging rings/links</strong> — must be rated for the load. No field-welded rigging hardware.</li>
+        <li>Softeners/padding required when sling contacts sharp edges</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">INSPECTION</span><h3>Rigging Inspection Requirements</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>Who Inspects</h4>
+      <ul>
+        <li>A <strong>qualified rigger</strong> must inspect all rigging before each use</li>
+        <li>Annual inspection by a qualified person required for all rigging hardware</li>
+        <li>Operator must visually verify rigging before the lift</li>
+      </ul>
+      <h4>Pre-Lift Check</h4>
+      <ul>
+        <li>Verify sling rating vs. load weight</li>
+        <li>Check sling angle — calculate actual load on each leg</li>
+        <li>Confirm all shackle pins are seated and moused</li>
+        <li>Verify hook latch is functional</li>
+        <li>Ensure load is balanced — center of gravity below the hook</li>
+        <li>Check that taglines are attached and handlers are clear</li>
+      </ul>
+      <div class="key-fact">The operator has the right and obligation to refuse a lift if rigging appears unsafe or is not rated for the load. This cannot be overridden by the employer.</div>
+      <h4>Load Weight — Know Before You Lift</h4>
+      <ul>
+        <li>Weight must be known or calculated before rigging</li>
+        <li>Steel: approximately <strong>490 lbs per cubic foot</strong></li>
+        <li>Concrete: approximately <strong>150 lbs per cubic foot</strong></li>
+        <li>Load must never exceed the rated capacity of the rigging OR the crane's load chart for that configuration</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">TAG LINES</span><h3>Taglines &amp; Load Control</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <ul>
+        <li>Taglines are <strong>required</strong> on all suspended loads to prevent uncontrolled spinning or swinging</li>
+        <li>Must be long enough to be controlled from a safe distance</li>
+        <li>Tagline handlers must stand clear of the load's fall zone</li>
+        <li>Never wrap a tagline around your hand or body</li>
+        <li>Non-conductive taglines required near energized power lines</li>
+      </ul>
+      <div class="key-fact">Never stand under or in the swing path of a suspended load — regardless of taglines. Taglines guide the load; they don't make it safe to be underneath it.</div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ═══ EXCAVATION ═══ -->
+<section id="excavation" class="section">
+  <div class="card" style="background:linear-gradient(135deg,#1a1f2e,#161a22);border-color:#2a3040;margin-bottom:24px;">
+    <div class="card-title">⛏️ Excavation, Trenching &amp; Shoring <span class="tag">520 CMR / OSHA 29 CFR 1926 Subpart P</span></div>
+    <p>Excavation and trenching is one of the most dangerous construction operations. Massachusetts follows OSHA Subpart P for excavation safety. The 2A-1C exam tests soil classification, protective systems, and safe entry/exit requirements.</p>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">DEFINITIONS</span><h3>Excavation vs. Trench — Key Definitions</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <ul>
+        <li><strong>Excavation</strong> — any man-made cut, cavity, trench, or depression in the earth's surface formed by earth removal</li>
+        <li><strong>Trench</strong> — a narrow excavation (in relation to its length) made below the surface of the ground. Depth generally greater than its width, and width no greater than <strong>15 feet</strong></li>
+        <li><strong>Competent Person</strong> — someone capable of identifying existing and predictable hazards and authorized to take corrective action. Required on site for ALL excavations.</li>
+      </ul>
+      <div class="key-fact">A Competent Person must be on site for every excavation. This is non-negotiable under OSHA and Massachusetts law. The operator cannot substitute for this role unless specifically trained and designated.</div>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">SOIL TYPES</span><h3>Soil Classification — Types A, B, C</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>Type A — Most Stable</h4>
+      <ul>
+        <li>Cohesive soils: clay, silty clay, sandy clay</li>
+        <li>Unconfined compressive strength ≥ 1.5 tons/sq ft</li>
+        <li>No fissures, no vibration, not previously disturbed</li>
+        <li>Maximum allowable slope: <strong>3/4:1 (53°)</strong></li>
+      </ul>
+      <h4>Type B — Moderate Stability</h4>
+      <ul>
+        <li>Cohesive soil with fissures, or granular cohesionless soil</li>
+        <li>Unconfined compressive strength 0.5–1.5 tons/sq ft</li>
+        <li>Previously disturbed soils, or near sources of vibration</li>
+        <li>Maximum allowable slope: <strong>1:1 (45°)</strong></li>
+      </ul>
+      <h4>Type C — Least Stable</h4>
+      <ul>
+        <li>Granular soils: gravel, sand, loamy sand</li>
+        <li>Submerged soil, or soil from which water is freely seeping</li>
+        <li>Unconfined compressive strength less than 0.5 tons/sq ft</li>
+        <li>Maximum allowable slope: <strong>1½:1 (34°)</strong></li>
+      </ul>
+      <div class="key-fact">Type C is the most common soil classification on exam questions. When in doubt, classify as Type C — it's the most conservative (safest) choice.</div>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">PROTECTIVE SYSTEMS</span><h3>Sloping, Shoring &amp; Trench Boxes</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>When Required</h4>
+      <ul>
+        <li>Any excavation <strong>5 feet or deeper</strong> requires a protective system unless solid rock</li>
+        <li>Competent Person may determine a protective system is needed at less than 5 feet if conditions warrant</li>
+        <li>Any excavation <strong>20 feet or deeper</strong> requires a protective system designed by a registered Professional Engineer</li>
+      </ul>
+      <div class="key-fact">5 feet = protective system required. 20 feet = PE design required. These are the two critical depth numbers.</div>
+      <h4>Sloping</h4>
+      <ul>
+        <li>Cutting back trench walls to a stable angle based on soil type (see Type A/B/C above)</li>
+        <li>Simple, low cost — requires more surface area</li>
+        <li>Spoil pile must be kept at least <strong>2 feet</strong> from the edge of the excavation</li>
+      </ul>
+      <h4>Shoring</h4>
+      <ul>
+        <li>Installing support structures (wood, aluminum, hydraulic) against trench walls</li>
+        <li>Installed from the top down, removed from the bottom up</li>
+        <li>Workers must never be in the trench while shoring is being installed or removed unless protected</li>
+        <li>Hydraulic shoring must be rated for the soil load</li>
+      </ul>
+      <h4>Trench Boxes (Shield Systems)</h4>
+      <ul>
+        <li>Pre-fabricated steel or aluminum box placed in the trench — workers work inside the box</li>
+        <li>Protects workers inside — does NOT protect walls outside the box</li>
+        <li>Must be rated for the soil conditions</li>
+        <li>Box must extend at least <strong>18 inches above</strong> the top of the trench if used in a sloped excavation</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">ACCESS &amp; EGRESS</span><h3>Entry, Exit &amp; Safety Requirements</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <ul>
+        <li>Ladders, steps, or ramps required for excavations <strong>4 feet or deeper</strong></li>
+        <li>Access point must be within <strong>25 lateral feet</strong> of workers at all times</li>
+        <li>Ladders must extend at least <strong>3 feet above</strong> the top of the excavation</li>
+        <li>Workers must not cross an excavation without a bridge or walkway with guardrails</li>
+      </ul>
+      <div class="key-fact">4 feet = ladder required. 25 feet = max distance to the ladder. 3 feet = ladder must extend above the top. These three numbers appear on the exam.</div>
+      <h4>Water Accumulation</h4>
+      <ul>
+        <li>Workers must not work in excavations where water has accumulated unless adequate precautions are taken</li>
+        <li>Water must be controlled (pumped out) and Competent Person must inspect after any rain event</li>
+        <li>Excavations in Type C soil near water are extremely high risk</li>
+      </ul>
+      <h4>Atmosphere Testing</h4>
+      <ul>
+        <li>Excavations deeper than <strong>4 feet</strong> must be tested for hazardous atmospheres if conditions could create one (near fuel tanks, utilities, landfills)</li>
+        <li>Oxygen level must be 19.5%–23.5%</li>
+        <li>If atmosphere is hazardous, workers must not enter until it is safe</li>
+      </ul>
+      <h4>Inspection Requirements</h4>
+      <ul>
+        <li>Competent Person must inspect the excavation <strong>daily</strong> before workers enter, and after any rain, freeze/thaw, or other event that could affect stability</li>
+        <li>Spoil piles and equipment must stay at least <strong>2 feet</strong> from the edge</li>
+        <li>No excavation equipment should be operated within the angle of repose of the trench wall without engineering analysis</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">DIGSAFE + EXCAVATION</span><h3>DigSafe &amp; Utility Clearance During Excavation</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <ul>
+        <li>Call <strong>811</strong> at least <strong>72 hours</strong> before ANY excavation (excluding weekends/holidays)</li>
+        <li>Utility marks are valid for <strong>30 days</strong> — re-notify if work continues past 30 days</li>
+        <li>Within <strong>18 inches</strong> of a marked utility, excavation must be done by <strong>hand tools only</strong> — no mechanical equipment</li>
+        <li>If you expose an unmarked utility, stop work and notify the utility company</li>
+        <li>If you strike a gas line: evacuate immediately, call 911 and the gas company</li>
+      </ul>
+      <div class="key-fact">18-inch hand-dig zone around marked utilities. This is a Massachusetts-specific rule that appears on the exam. No mechanical equipment within 18 inches of a marked utility line.</div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ═══ FORKLIFTS ═══ -->
+<section id="forklifts" class="section">
+  <div class="card" style="background:linear-gradient(135deg,#1a1f2e,#161a22);border-color:#2a3040;margin-bottom:24px;">
+    <div class="card-title">🚜 Forklifts (Powered Industrial Trucks) <span class="tag">4D License / OSHA 29 CFR 1910.178</span></div>
+    <p>In Massachusetts, operating a forklift requires a <strong>4D hoisting license</strong> in addition to OSHA forklift operator training. The exam tests stability, load handling, pre-operation inspection, and pedestrian safety.</p>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">LICENSING</span><h3>Massachusetts 4D License Requirements</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <ul>
+        <li>A <strong>4D hoisting license</strong> is required to operate any forklift (powered industrial truck) in Massachusetts</li>
+        <li>This is separate from and in addition to OSHA operator training required by federal law</li>
+        <li>Must be at least <strong>18 years old</strong></li>
+        <li>License must be carried on person while operating</li>
+        <li>Employer must also ensure OSHA-compliant operator training is completed every <strong>3 years</strong> or when unsafe operation is observed</li>
+      </ul>
+      <div class="key-fact">Massachusetts requires BOTH a 4D state hoisting license AND OSHA operator training. Having one without the other is a violation.</div>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">STABILITY</span><h3>Stability Triangle &amp; Load Capacity</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>Stability Triangle</h4>
+      <p>A forklift's stability is based on a three-point system — two front drive wheels and the rear axle pivot point form a triangle. The forklift will tip over if the combined center of gravity (forklift + load) moves outside this triangle.</p>
+      <ul>
+        <li>Adding a load shifts the center of gravity forward</li>
+        <li>Raising forks raises the combined center of gravity — increases tip-over risk</li>
+        <li>Turning with a raised load dramatically increases tip risk</li>
+        <li>Never turn on a ramp or incline with a raised load</li>
+      </ul>
+      <div class="key-fact">The stability triangle is the most tested concept in forklift safety. The forklift tips when the center of gravity leaves the triangle — caused by overloading, raising forks too high, or turning too sharply.</div>
+      <h4>Load Capacity &amp; Data Plate</h4>
+      <ul>
+        <li>Every forklift must have a <strong>data plate</strong> (capacity plate) permanently attached and legible</li>
+        <li>Rated capacity is based on a standard <strong>load center</strong> (typically <strong>24 inches</strong> from the face of the forks)</li>
+        <li>If the load center is farther than rated (long or off-center load), capacity is reduced</li>
+        <li>Never exceed the rated capacity — and derate for attachments (attachments reduce capacity)</li>
+        <li>Never remove or alter the data plate</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">PRE-OP</span><h3>Pre-Operation Inspection</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <p>A pre-shift inspection is required before every use. If a defect is found, the forklift must be tagged out and removed from service until repaired.</p>
+      <h4>Check Before Starting</h4>
+      <ul>
+        <li>Fluid levels: engine oil, hydraulic fluid, coolant, fuel/battery charge</li>
+        <li>Tires: condition, inflation (pneumatic), no damage</li>
+        <li>Forks: cracks, bends, heel wear — fork heel thickness must not be worn more than <strong>10%</strong></li>
+        <li>Mast: chains, rollers, hydraulic cylinders — no leaks</li>
+        <li>Overhead guard: in place and undamaged</li>
+        <li>Data plate: present and legible</li>
+        <li>Seatbelt: functional</li>
+        <li>Horn, lights, warning devices: working</li>
+        <li>Brakes: tested at slow speed</li>
+      </ul>
+      <div class="key-fact">Fork heel wear exceeding 10% = remove from service. The overhead guard must always be in place — it is never optional.</div>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">OPERATION</span><h3>Safe Operating Rules</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <h4>Travel</h4>
+      <ul>
+        <li>Forks must be <strong>4–6 inches off the ground</strong> when traveling</li>
+        <li>Mast must be tilted back when traveling with a load</li>
+        <li>Travel with load upgrade on ramps; travel unloaded downgrade (forks facing downhill)</li>
+        <li>Never exceed posted speed limits — generally <strong>5 mph</strong> in pedestrian areas</li>
+        <li>Slow down and sound horn at blind intersections and doorways</li>
+      </ul>
+      <h4>Pedestrian Safety</h4>
+      <ul>
+        <li>Pedestrians always have the right of way</li>
+        <li>Maintain a minimum <strong>3-foot clearance</strong> when passing pedestrians</li>
+        <li>Never allow passengers on a forklift unless a designated seat is provided</li>
+        <li>Never use forks to elevate a person unless an approved work platform with guardrails is attached</li>
+      </ul>
+      <h4>Fueling / Charging</h4>
+      <ul>
+        <li>Propane: engine off, no smoking, outdoors or well-ventilated area</li>
+        <li>Electric: charge in designated area, ventilate hydrogen gas, no sparks near batteries</li>
+        <li>Never fuel near open flames or sparks</li>
+      </ul>
+      <div class="key-fact">Forks 4–6 inches off the ground while traveling. Mast tilted back. Load uphill on ramps. These three travel rules appear together on the exam.</div>
+      <h4>Parking</h4>
+      <ul>
+        <li>Forks must be <strong>fully lowered to the ground</strong> when parked</li>
+        <li>Mast tilted forward slightly to rest forks flat</li>
+        <li>Engine off, parking brake set, key removed</li>
+        <li>Never park on an incline unless wheels are chocked</li>
+        <li>Never park blocking fire exits, emergency equipment, or fire suppression systems</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="accordion-item" onclick="toggleAccordion(this)">
+    <div class="accordion-header"><div style="display:flex;align-items:center;flex:1;"><span class="section-ref">REFUELING / BATTERY</span><h3>Refueling, Recharging &amp; Indoor Use</h3></div><span class="accordion-chevron">▼</span></div>
+    <div class="accordion-body"><div class="accordion-content">
+      <ul>
+        <li>LP gas, gasoline, and diesel forklifts produce <strong>carbon monoxide (CO)</strong> — must not be used indoors without adequate ventilation</li>
+        <li>Electric forklifts produce no emissions — preferred for indoor use</li>
+        <li>Propane cylinders must be inspected for leaks and damage before use</li>
+        <li>Battery charging produces hydrogen gas — explosion risk. No sparks or open flame in charging area.</li>
+        <li>Spilled battery acid must be neutralized and cleaned up immediately</li>
+      </ul>
+      <div class="key-fact">Carbon monoxide poisoning from propane/gas forklifts indoors is a leading cause of forklift-related illness. Adequate ventilation or electric forklifts are required for indoor use.</div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ═══ QUIZ ═══ -->
+<section id="quiz" class="section">
+  <div class="quiz-wrap">
+    <div id="quiz-container">
+      <div class="q-counter">
+        <span id="q-counter">QUESTION 1 OF 25</span>
+        <span class="q-score-live" id="q-score-live">✓ 0 &nbsp; ✗ 0</span>
+      </div>
+      <div class="q-progress"><div class="q-progress-fill" id="q-progress-fill" style="width:4%"></div></div>
+      <div class="question-box" id="question-box"></div>
+      <div id="explanation" class="explanation"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">NEXT QUESTION →</button>
+    </div>
+    <div class="score-box" id="score-box">
+      <div class="score-num" id="score-num">0/25</div>
+      <div class="score-label">Final Score</div>
+      <div class="score-msg" id="score-msg"></div>
+      <div class="cat-breakdown">
+        <h4>Score by Topic</h4>
+        <div id="result-cats"></div>
+      </div>
+      <button class="restart-btn" onclick="restartQuiz()">RETAKE QUIZ</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CHEAT SHEET ═══ -->
+<section id="cheatsheet" class="section">
+  <div class="card" style="border-color:var(--accent);margin-bottom:20px;">
+    <div class="card-title">⚡ Quick Reference Cheat Sheet</div>
+    <p style="font-size:0.82rem;color:var(--muted);">Key numbers, rules, and facts. Drill these before Monday.</p>
+  </div>
+  <div class="cheat-grid">
+    <div class="card" style="border-left:3px solid var(--accent);">
+      <div class="card-title" style="font-size:1.05rem;">📅 Key Numbers</div>
+      <ul style="padding-left:16px;font-size:0.87rem;line-height:2.1;color:#c0cad8;">
+        <li>Accident report: <strong style="color:var(--accent)">24 hours</strong></li>
+        <li>DigSafe notice: <strong style="color:var(--accent)">72 hours</strong> prior</li>
+        <li>Power line clearance: <strong style="color:var(--accent)">10 feet</strong> (≤50kV)</li>
+        <li>License term: <strong style="color:var(--accent)">3 years</strong></li>
+        <li>Minimum age: <strong style="color:var(--accent)">18 years</strong></li>
+        <li>Max fine per day: <strong style="color:var(--accent)">$1,000</strong></li>
+        <li>DigSafe fine: up to <strong style="color:var(--accent)">$10,000</strong>/incident</li>
+        <li>Max jail: <strong style="color:var(--accent)">1 year</strong> per day</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="card-title" style="font-size:1.05rem;color:var(--green);">✅ Operator Rights</div>
+      <ul style="padding-left:16px;font-size:0.87rem;line-height:2.1;color:#c0cad8;">
+        <li>Right to <strong style="color:var(--green)">refuse</strong> unsafe equipment</li>
+        <li>Cannot be fired for refusing unsafe op</li>
+        <li>Right to stop work for any safety concern</li>
+        <li>Must have load chart <strong>in cab</strong></li>
+        <li>Must carry license on person</li>
+        <li>Must do pre-shift inspection</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="card-title" style="font-size:1.05rem;color:var(--red);">🚫 Never Do</div>
+      <ul style="padding-left:16px;font-size:0.87rem;line-height:2.1;color:#c0cad8;">
+        <li>Never exceed rated capacity</li>
+        <li>Never operate within 10ft of power lines</li>
+        <li>Never operate with expired/no license</li>
+        <li>Never move equipment after accident w/o release</li>
+        <li>Never take signals from 2+ people</li>
+        <li>Never allow workers under suspended load</li>
+        <li>Never dig without calling DigSafe first</li>
+        <li>Never operate impaired</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--blue);">
+      <div class="card-title" style="font-size:1.05rem;color:var(--blue);">📡 Signal Rules</div>
+      <ul style="padding-left:16px;font-size:0.87rem;line-height:2.1;color:#c0cad8;">
+        <li>Only <strong style="color:var(--blue)">ONE</strong> designated signalperson</li>
+        <li><strong style="color:var(--blue)">ANYONE</strong> can give STOP / Emergency Stop</li>
+        <li>Signalperson must be visible to operator</li>
+        <li>If signal unclear → operator STOPS</li>
+        <li>Two-way radio OK when visual not possible</li>
+        <li>Signalperson must be qualified/trained</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--accent2);">
+      <div class="card-title" style="font-size:1.05rem;color:var(--accent2);">🔑 License Classes</div>
+      <ul style="padding-left:16px;font-size:0.87rem;line-height:2.1;color:#c0cad8;">
+        <li><strong style="color:var(--accent)">2A</strong> – Hoisting &gt;10,000 lb (this tool)</li>
+        <li><strong style="color:var(--accent)">2B</strong> – Hoisting up to 10,000 lb</li>
+        <li><strong style="color:var(--accent)">4D</strong> – Forklifts</li>
+        <li><strong style="color:var(--accent)">Crane classes</strong> – Separate licensing beyond scope of this tool</li>
+        <li>Contact Board of Boiler Rules: <strong style="color:var(--accent)">617-727-9640</strong></li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid #9b59b6;">
+      <div class="card-title" style="font-size:1.05rem;color:#9b59b6;">🏛️ Authority Hierarchy</div>
+      <ul style="padding-left:16px;font-size:0.87rem;line-height:2.1;color:#c0cad8;">
+        <li><strong style="color:#9b59b6">Board of Boiler Rules</strong> → issues licenses, sets rules</li>
+        <li><strong style="color:#9b59b6">Board Inspector</strong> → enforces, releases accident scenes</li>
+        <li>Under Dept. of Public Safety</li>
+        <li>OSHA = federal, parallel authority</li>
+        <li>Police = scene control ≠ equipment release</li>
+        <li>Employer = CANNOT release accident scene</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+// PROGRESS / STORAGE
+// ══════════════════════════════════════════════
+const STORAGE_KEY = '2a1c_progress_v2';
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||initProg(); }
+  catch(e){ return initProg(); }
+}
+function initProg(){
+  return { totalQ:0, correct:0, bestStreak:0, sessions:0, cats:{}, lastSession:null };
+}
+function saveProgress(p){ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); updateRing(); }
+
+function updateRing(){
+  const p = loadProgress();
+  const pct = p.totalQ>0 ? Math.round(p.correct/p.totalQ*100) : 0;
+  const circ = 138.2;
+  const offset = circ - (circ * pct / 100);
+  document.getElementById('ring-circle').style.strokeDashoffset = offset;
+  document.getElementById('ring-pct').textContent = pct+'%';
+}
+
+function openProg(){
+  const p = loadProgress();
+  document.getElementById('p-total-q').textContent = p.totalQ;
+  document.getElementById('p-correct').textContent = p.correct;
+  document.getElementById('p-streak').textContent = p.bestStreak;
+  document.getElementById('p-sessions').textContent = p.sessions;
+  // category bars
+  const cats = p.cats||{};
+  const allCats = ['MGL CH. 146 § 53','MGL CH. 146 § 53A','MGL CH. 146 § 54A','MGL CH. 146 § 57','MGL CH. 146 § 65','230 CMR 6','HAND SIGNALS','DIGSAFE','ACCIDENT SCENE'];
+  let html = '';
+  allCats.forEach(c => {
+    const d = cats[c]||{a:0,t:0};
+    const pct = d.t>0 ? Math.round(d.a/d.t*100) : 0;
+    const color = pct>=80?'var(--green)':pct>=50?'var(--accent)':'var(--accent2)';
+    html += `<div class="cat-row"><div class="cat-name">${c.replace('MGL CH. 146 ','')}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${pct}%;background:${color};"></div></div><div class="cat-pct">${d.t>0?pct+'%':'--'}</div></div>`;
+  });
+  document.getElementById('cat-bars').innerHTML = html;
+  document.getElementById('prog-modal').classList.add('open');
+}
+function closeProg(){ document.getElementById('prog-modal').classList.remove('open'); }
+function resetProgress(){
+  if(confirm('Reset all progress data? This cannot be undone.')){
+    localStorage.removeItem(STORAGE_KEY);
+    updateRing();
+    closeProg();
+  }
+}
+function recordAnswer(cat, correct){
+  const p = loadProgress();
+  p.totalQ = (p.totalQ||0)+1;
+  if(correct) p.correct = (p.correct||0)+1;
+  if(!p.cats) p.cats={};
+  if(!p.cats[cat]) p.cats[cat]={a:0,t:0};
+  p.cats[cat].t++;
+  if(correct) p.cats[cat].a++;
+  saveProgress(p);
+}
+function recordSession(){
+  const p = loadProgress();
+  p.sessions = (p.sessions||0)+1;
+  saveProgress(p);
+}
+function updateBestStreak(s){
+  const p = loadProgress();
+  if(s>(p.bestStreak||0)){ p.bestStreak=s; saveProgress(p); }
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function showSection(id, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  else document.querySelectorAll('.tab').forEach(t=>{ if(t.textContent.toLowerCase().includes(id.substring(0,3))) t.classList.add('active'); });
+}
+function toggleAccordion(el){ el.classList.toggle('open'); }
+
+// ══════════════════════════════════════════════
+// BOOKMARKS
+// ══════════════════════════════════════════════
+const bookmarks = new Set(JSON.parse(localStorage.getItem('2a1c_bookmarks')||'[]'));
+function bookmarkFact(btn){
+  const fact = btn.dataset.fact;
+  if(bookmarks.has(fact)){
+    bookmarks.delete(fact);
+    btn.textContent='☆ Bookmark'; btn.classList.remove('saved');
+  } else {
+    bookmarks.add(fact);
+    btn.textContent='★ Saved'; btn.classList.add('saved');
+  }
+  localStorage.setItem('2a1c_bookmarks', JSON.stringify([...bookmarks]));
+  renderBookmarks();
+}
+function renderBookmarks(){
+  const bar = document.getElementById('bookmarks-bar');
+  const list = document.getElementById('bookmarks-list');
+  if(bookmarks.size===0){ bar.style.display='none'; return; }
+  bar.style.display='block';
+  list.innerHTML = [...bookmarks].map(f=>`<div style="padding:3px 0;border-bottom:1px solid var(--border);">★ ${f}</div>`).join('');
+}
+// Restore bookmark button states
+function restoreBookmarkBtns(){
+  document.querySelectorAll('.bookmark-btn').forEach(btn=>{
+    if(bookmarks.has(btn.dataset.fact)){
+      btn.textContent='★ Saved'; btn.classList.add('saved');
+    }
+  });
+  renderBookmarks();
+}
+
+// ══════════════════════════════════════════════
+// HAND SIGNALS — SVG illustrated figures (230 CMR Appendix A style)
+// ══════════════════════════════════════════════
+
+function figureBase(armsSVG, motionSVG) {
+  if (!motionSVG) motionSVG = '';
+  var body = '<svg viewBox="0 0 120 160" width="110" height="147" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">'
+    + '<g stroke="#e8ecf4" stroke-linecap="round" stroke-linejoin="round" fill="none">'
+    + '<ellipse cx="60" cy="19" rx="18" ry="5" stroke-width="2.5" fill="#e8ecf4" stroke="#e8ecf4"/>'
+    + '<path d="M42 21 Q44 8 60 7 Q76 8 78 21" stroke-width="2.5" fill="#c8d0e0" stroke="#e8ecf4"/>'
+    + '<circle cx="60" cy="28" r="10" stroke-width="2" fill="#1e2430"/>'
+    + '<line x1="60" y1="38" x2="60" y2="44" stroke-width="2.5"/>'
+    + '<rect x="48" y="44" width="24" height="30" rx="4" stroke-width="2" fill="#1e2430"/>'
+    + '<line x1="46" y1="68" x2="74" y2="68" stroke-width="1.5" stroke-dasharray="3,2"/>'
+    + '<line x1="55" y1="74" x2="52" y2="105" stroke-width="3"/>'
+    + '<line x1="65" y1="74" x2="68" y2="105" stroke-width="3"/>'
+    + '<path d="M48 105 Q52 110 58 108" stroke-width="3"/>'
+    + '<path d="M72 105 Q68 110 62 108" stroke-width="3"/>'
+    + armsSVG
+    + '</g>'
+    + motionSVG
+    + '</svg>';
+  return body;
+}
+
+var signals = [
+  { name:"Hoist", desc:"Raise the load", detail:"Forearm vertical, forefinger pointing up — move hand in small horizontal circle.",
+    svg: figureBase(
+      '<line x1="72" y1="50" x2="88" y2="50" stroke-width="3"/><line x1="88" y1="50" x2="88" y2="22" stroke-width="3"/><line x1="88" y1="22" x2="88" y2="14" stroke-width="2.5"/><line x1="48" y1="50" x2="36" y2="62" stroke-width="3"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><path d="M82 13 A8 5 0 1 1 94 13" stroke-linecap="round"/><polygon points="94,13 97,9 91,9" fill="#f5a623" stroke="none"/></g><g stroke="#f5a623" stroke-width="2" fill="none"><line x1="30" y1="130" x2="30" y2="115"/><polygon points="30,110 26,118 34,118" fill="#f5a623" stroke="none"/></g>'
+    )},
+  { name:"Lower", desc:"Lower the load", detail:"Arm extended downward, forefinger pointing down — move hand in small horizontal circle.",
+    svg: figureBase(
+      '<line x1="72" y1="50" x2="88" y2="60" stroke-width="3"/><line x1="88" y1="60" x2="92" y2="82" stroke-width="3"/><line x1="92" y1="82" x2="93" y2="92" stroke-width="2.5"/><line x1="48" y1="50" x2="36" y2="62" stroke-width="3"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><path d="M88 94 A8 5 0 1 0 100 94" stroke-linecap="round"/><polygon points="88,94 85,98 91,98" fill="#f5a623" stroke="none"/></g><g stroke="#f5a623" stroke-width="2"><line x1="30" y1="115" x2="30" y2="130"/><polygon points="30,135 26,127 34,127" fill="#f5a623" stroke="none"/></g>'
+    )},
+  { name:"Stop", desc:"Halt all motion — ANY person can give this", detail:"Arm extended, palm facing down, hold position. ANYONE on site can give STOP.",
+    svg: figureBase(
+      '<line x1="72" y1="52" x2="100" y2="52" stroke-width="3"/><rect x="96" y="48" width="10" height="7" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="48" y1="52" x2="34" y2="62" stroke-width="3"/>',
+      '<g stroke="#e74c3c" stroke-width="2.5" fill="none"><line x1="55" y1="140" x2="75" y2="140"/><line x1="65" y1="133" x2="65" y2="147"/></g><text x="65" y="158" text-anchor="middle" font-size="8" fill="#e74c3c" font-family="sans-serif" font-weight="bold">ANYONE</text>'
+    )},
+  { name:"Emergency Stop", desc:"Immediately stop ALL motion", detail:"Both arms extended outward, palms down — wave both arms back and forth rapidly. Anyone can give this.",
+    svg: figureBase(
+      '<line x1="72" y1="52" x2="104" y2="52" stroke-width="3"/><rect x="100" y="48" width="10" height="7" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="48" y1="52" x2="16" y2="52" stroke-width="3"/><rect x="10" y="48" width="10" height="7" rx="2" stroke-width="1.5" fill="#1e2430"/>',
+      '<g stroke="#e74c3c" stroke-width="2" fill="none"><path d="M100 44 Q108 50 100 56" stroke-linecap="round"/><path d="M20 44 Q12 50 20 56" stroke-linecap="round"/></g><text x="60" y="125" text-anchor="middle" font-size="7.5" fill="#e74c3c" font-family="sans-serif" font-weight="bold">WAVE BOTH ARMS</text>'
+    )},
+  { name:"Swing", desc:"Rotate the upper works", detail:"Arm extended, point with finger in the direction of the desired swing.",
+    svg: figureBase(
+      '<line x1="72" y1="52" x2="108" y2="52" stroke-width="3"/><line x1="48" y1="52" x2="36" y2="66" stroke-width="3"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><path d="M100 40 A14 14 0 0 1 114 54" stroke-linecap="round"/><polygon points="114,54 110,48 116,50" fill="#f5a623" stroke="none"/></g><text x="60" y="130" text-anchor="middle" font-size="7.5" fill="#f5a623" font-family="sans-serif">POINT DIRECTION</text>'
+    )},
+  { name:"Raise Boom", desc:"Increase the boom angle", detail:"Arm extended, thumb pointing up — flex fingers in and out as long as motion is desired.",
+    svg: figureBase(
+      '<line x1="72" y1="52" x2="100" y2="48" stroke-width="3"/><rect x="97" y="44" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="100" y1="42" x2="100" y2="37" stroke-width="2.5"/><line x1="48" y1="52" x2="36" y2="64" stroke-width="3"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><line x1="95" y1="33" x2="95" y2="22"/><polygon points="95,18 91,26 99,26" fill="#f5a623" stroke="none"/></g>'
+    )},
+  { name:"Lower Boom", desc:"Decrease the boom angle", detail:"Arm extended, thumb pointing down — flex fingers in and out as long as motion is desired.",
+    svg: figureBase(
+      '<line x1="72" y1="52" x2="100" y2="56" stroke-width="3"/><rect x="97" y="53" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="100" y1="63" x2="100" y2="68" stroke-width="2.5"/><line x1="48" y1="52" x2="36" y2="64" stroke-width="3"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><line x1="95" y1="70" x2="95" y2="80"/><polygon points="95,84 91,76 99,76" fill="#f5a623" stroke="none"/></g>'
+    )},
+  { name:"Extend Boom", desc:"Telescope boom out (extend)", detail:"Both fists in front of face with thumbs pointing outward — move fists away from each other.",
+    svg: figureBase(
+      '<line x1="72" y1="50" x2="90" y2="38" stroke-width="3"/><rect x="87" y="33" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="48" y1="50" x2="30" y2="38" stroke-width="3"/><rect x="24" y="33" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><line x1="90" y1="30" x2="103" y2="25"/><polygon points="107,23 98,24 101,31" fill="#f5a623" stroke="none"/><line x1="30" y1="30" x2="17" y2="25"/><polygon points="13,23 22,24 19,31" fill="#f5a623" stroke="none"/></g><text x="60" y="130" text-anchor="middle" font-size="7.5" fill="#f5a623" font-family="sans-serif">THUMBS OUT</text>'
+    )},
+  { name:"Retract Boom", desc:"Telescope boom in (retract)", detail:"Both fists in front of face with thumbs pointing inward — move fists toward each other.",
+    svg: figureBase(
+      '<line x1="72" y1="50" x2="90" y2="38" stroke-width="3"/><rect x="87" y="33" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="48" y1="50" x2="30" y2="38" stroke-width="3"/><rect x="24" y="33" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><line x1="88" y1="28" x2="76" y2="28"/><polygon points="72,28 80,24 80,32" fill="#f5a623" stroke="none"/><line x1="32" y1="28" x2="44" y2="28"/><polygon points="48,28 40,24 40,32" fill="#f5a623" stroke="none"/></g><text x="60" y="130" text-anchor="middle" font-size="7.5" fill="#f5a623" font-family="sans-serif">THUMBS IN</text>'
+    )},
+  { name:"Travel (Both Tracks)", desc:"Move crane forward or backward", detail:"Fists in front of body, thumbs toward body — rotate both forearms in the direction of travel.",
+    svg: figureBase(
+      '<line x1="72" y1="54" x2="86" y2="60" stroke-width="3"/><rect x="83" y="57" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="48" y1="54" x2="34" y2="60" stroke-width="3"/><rect x="28" y="57" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><path d="M84 52 A6 6 0 1 1 96 58" stroke-linecap="round"/><polygon points="96,58 92,53 99,54" fill="#f5a623" stroke="none"/><path d="M36 52 A6 6 0 1 0 24 58" stroke-linecap="round"/><polygon points="24,58 28,53 21,54" fill="#f5a623" stroke="none"/></g><text x="60" y="130" text-anchor="middle" font-size="7.5" fill="#f5a623" font-family="sans-serif">ROTATE BOTH FOREARMS</text>'
+    )},
+  { name:"Travel (One Track)", desc:"Move one crawler track only", detail:"Lock one fist still (stationary track), rotate the other fist forward (moving track).",
+    svg: figureBase(
+      '<line x1="72" y1="54" x2="88" y2="60" stroke-width="3"/><rect x="85" y="57" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="48" y1="54" x2="32" y2="60" stroke-width="3"/><rect x="26" y="57" width="9" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/><line x1="27" y1="58" x2="34" y2="64" stroke-width="1.5" stroke="#e74c3c"/><line x1="34" y1="58" x2="27" y2="64" stroke-width="1.5" stroke="#e74c3c"/>',
+      '<g stroke="#f5a623" stroke-width="2" fill="none"><path d="M86 52 A6 6 0 1 1 98 58" stroke-linecap="round"/><polygon points="98,58 94,53 101,54" fill="#f5a623" stroke="none"/></g><text x="60" y="125" text-anchor="middle" font-size="7" fill="#e74c3c" font-family="sans-serif">X = LOCKED TRACK</text>'
+    )},
+  { name:"Dog Everything", desc:"Stop — pause all operations", detail:"Clasp both hands together in front of the body. Hold until further signal.",
+    svg: figureBase(
+      '<line x1="72" y1="56" x2="66" y2="70" stroke-width="3"/><line x1="48" y1="56" x2="54" y2="70" stroke-width="3"/><rect x="54" y="68" width="12" height="9" rx="3" stroke-width="2" fill="#1e2430"/>',
+      '<g stroke="#3b9eff" stroke-width="2" fill="none"><line x1="48" y1="115" x2="72" y2="115"/><line x1="60" y1="108" x2="60" y2="122"/></g><text x="60" y="140" text-anchor="middle" font-size="7.5" fill="#3b9eff" font-family="sans-serif">CLASP HANDS</text>'
+    )},
+  { name:"Use Main Hoist", desc:"Signal applies to the main hoist", detail:"Tap fist on top of head, then use the regular motion signal. Tells operator which hoist.",
+    svg: figureBase(
+      '<line x1="72" y1="50" x2="74" y2="32" stroke-width="3"/><rect x="70" y="24" width="10" height="9" rx="3" stroke-width="1.5" fill="#1e2430"/><line x1="48" y1="52" x2="36" y2="66" stroke-width="3"/>',
+      '<text x="60" y="130" text-anchor="middle" font-size="7.5" fill="#f5a623" font-family="sans-serif">TAP HEAD THEN SIGNAL</text>'
+    )},
+  { name:"Move Slowly", desc:"Fine / slow control modifier", detail:"Place one hand motionless in front of the hand giving the motion signal. Modifies any signal to mean slowly.",
+    svg: figureBase(
+      '<line x1="72" y1="50" x2="88" y2="50" stroke-width="3"/><line x1="88" y1="50" x2="88" y2="28" stroke-width="3"/><line x1="88" y1="28" x2="88" y2="20" stroke-width="2.5"/><line x1="48" y1="52" x2="30" y2="52" stroke-width="3"/><rect x="22" y="48" width="11" height="8" rx="2" stroke-width="1.5" fill="#1e2430"/>',
+      '<g stroke="#3b9eff" stroke-width="2" fill="none"><line x1="22" y1="44" x2="22" y2="60"/><line x1="18" y1="44" x2="26" y2="44"/><line x1="18" y1="60" x2="26" y2="60"/></g><text x="60" y="130" text-anchor="middle" font-size="7.5" fill="#3b9eff" font-family="sans-serif">STILL HAND = SLOW</text>'
+    )},
+];
+
+// Browse mode
+const sgrid = document.getElementById('signals-grid');
+signals.forEach(s=>{
+  const card = document.createElement('div');
+  card.className='signal-card';
+  card.innerHTML=`<div class="sig-svg">${s.svg}</div><div class="sig-name">${s.name}</div><div class="sig-desc">${s.desc}</div><div class="sig-detail">${s.detail}</div>`;
+  card.onclick=()=>card.classList.toggle('open');
+  sgrid.appendChild(card);
+});
+
+// Signal Quiz
+let sigQIdx=0, sigStreak=0, sigScore=0, sigTotal=0, sigAnswered=false;
+function setSigMode(mode){
+  document.getElementById('sig-browse').style.display = mode==='browse'?'block':'none';
+  document.getElementById('sig-quiz').style.display = mode==='quiz'?'block':'none';
+  document.getElementById('sig-browse-btn').classList.toggle('active', mode==='browse');
+  document.getElementById('sig-quiz-btn').classList.toggle('active', mode==='quiz');
+  if(mode==='quiz') renderSigQ();
+}
+
+function renderSigQ(){
+  sigAnswered=false;
+  document.getElementById('sig-next').style.display='none';
+  document.getElementById('sig-feedback').innerHTML='';
+  const q = signals[sigQIdx % signals.length];
+  // replace SVG viewBox size for the bigger quiz display
+  document.getElementById('sig-emoji').innerHTML = q.svg.replace('width="110" height="147"','width="150" height="200"');
+  document.getElementById('sig-q-sub').textContent = 'What is the name of this signal?';
+  document.getElementById('sig-streak').textContent = sigStreak;
+  document.getElementById('sig-score').textContent = sigScore;
+  document.getElementById('sig-total').textContent = sigTotal;
+
+  // 4 options: correct + 3 random wrong
+  let opts = [q];
+  const pool = signals.filter(s=>s.name!==q.name);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  opts = opts.concat(pool.slice(0,3));
+  for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+
+  const container = document.getElementById('sig-opts');
+  container.innerHTML='';
+  opts.forEach(o=>{
+    const btn = document.createElement('button');
+    btn.className='sig-opt-btn';
+    btn.textContent = o.name;
+    btn.onclick=()=>checkSig(btn, o.name===q.name, q);
+    container.appendChild(btn);
+  });
+}
+
+function checkSig(btn, correct, q){
+  if(sigAnswered) return;
+  sigAnswered=true; sigTotal++;
+  document.querySelectorAll('.sig-opt-btn').forEach(b=>b.disabled=true);
+  if(correct){
+    btn.classList.add('correct'); sigScore++; sigStreak++;
+    updateBestStreak(sigStreak);
+    document.getElementById('sig-feedback').innerHTML=`<div class="fc-result ok">✅ Correct! &nbsp;<em>${q.detail}</em></div>`;
+    recordAnswer('HAND SIGNALS', true);
+  } else {
+    btn.classList.add('wrong'); sigStreak=0;
+    document.querySelectorAll('.sig-opt-btn').forEach(b=>{ if(b.textContent===q.name) b.classList.add('correct'); });
+    document.getElementById('sig-feedback').innerHTML=`<div class="fc-result no">❌ This is <strong>${q.name}</strong> — ${q.detail}</div>`;
+    recordAnswer('HAND SIGNALS', false);
+  }
+  document.getElementById('sig-streak').textContent=sigStreak;
+  document.getElementById('sig-score').textContent=sigScore;
+  document.getElementById('sig-total').textContent=sigTotal;
+  document.getElementById('sig-next').style.display='inline-block';
+}
+
+function nextSigQ(){
+  sigQIdx++;
+  if(sigQIdx >= signals.length){
+    // shuffle and restart
+    for(let i=signals.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[signals[i],signals[j]]=[signals[j],signals[i]];}
+    sigQIdx=0;
+  }
+  renderSigQ();
+}
+
+// ══════════════════════════════════════════════
+// DIGSAFE FLASHCARDS
+// ══════════════════════════════════════════════
+const digColors = [
+  { hex:'#ff0000', textCol:'#fff', name:'RED', util:'Electric Power Lines, Cables & Conduit' },
+  { hex:'#ffcc00', textCol:'#000', name:'YELLOW', util:'Gas, Oil, Steam & Petroleum Pipelines' },
+  { hex:'#ff6600', textCol:'#fff', name:'ORANGE', util:'Telecommunications & Signal Lines' },
+  { hex:'#0066ff', textCol:'#fff', name:'BLUE', util:'Potable Water' },
+  { hex:'#00bb44', textCol:'#fff', name:'GREEN', util:'Sewers & Drain Lines' },
+  { hex:'#ff69b4', textCol:'#fff', name:'PINK', util:'Temporary Survey Markings' },
+  { hex:'#9400d3', textCol:'#fff', name:'PURPLE', util:'Reclaimed Water, Irrigation & Slurry' },
+  { hex:'#dddddd', textCol:'#000', name:'WHITE', util:'YOUR Proposed Excavation Limits' },
+];
+
+let fcIdx=0, fcFlipped=false;
+
+function setFCMode(mode){
+  document.getElementById('fc-flip-mode').style.display = mode==='flip'?'flex':'none';
+  document.getElementById('fc-guess-mode').style.display = mode==='guess'?'flex':'none';
+  document.getElementById('fc-guess2-mode').style.display = mode==='guess2'?'flex':'none';
+  document.getElementById('fc-flip-btn').classList.toggle('active',mode==='flip');
+  document.getElementById('fc-guess-btn').classList.toggle('active',mode==='guess');
+  document.getElementById('fc-guess2-btn').classList.toggle('active',mode==='guess2');
+  if(mode==='flip') renderFC();
+  if(mode==='guess'){ guessIdx=0; guessScore=0; guessTotal=0; renderGuess(); }
+  if(mode==='guess2'){ guess2Idx=0; guess2Score=0; guess2Total=0; renderGuess2(); }
+}
+
+function renderFC(){
+  const c = digColors[fcIdx];
+  fcFlipped=false;
+  const card = document.getElementById('fc-card');
+  card.classList.remove('flipped');
+  const swatch = document.getElementById('fc-swatch-front');
+  swatch.style.background = c.hex;
+  swatch.style.color = c.hex;
+  document.getElementById('fc-color-front').textContent = c.name;
+  document.getElementById('fc-color-front').style.color = c.hex==='#dddddd'?'#eee':c.hex;
+  document.getElementById('fc-utility-back').textContent = c.util;
+  document.getElementById('fc-swatch-back').style.background = c.hex;
+  document.getElementById('fc-swatch-back').style.color = c.hex;
+  document.getElementById('fc-counter').textContent = `${fcIdx+1}/${digColors.length}`;
+  document.getElementById('fc-prog-text').textContent = `Card ${fcIdx+1} of ${digColors.length}`;
+}
+
+function flipCard(){
+  fcFlipped=!fcFlipped;
+  document.getElementById('fc-card').classList.toggle('flipped',fcFlipped);
+}
+
+function fcNav(dir){
+  fcIdx = (fcIdx+dir+digColors.length)%digColors.length;
+  renderFC();
+}
+
+// Guess-the-color mode
+let guessIdx=0, guessScore=0, guessTotal=0, guessAnswered=false;
+let guessOrder = [...Array(digColors.length).keys()];
+
+function renderGuess(){
+  guessAnswered=false;
+  document.getElementById('fc-guess-result').style.display='none';
+  document.getElementById('fc-guess-next').style.display='none';
+  const c = digColors[guessOrder[guessIdx % guessOrder.length]];
+  document.getElementById('fc-g-utility').textContent = c.util;
+  document.getElementById('fc-guess-score').textContent = `Score: ${guessScore}/${guessTotal}`;
+
+  let opts = [c];
+  const pool = digColors.filter(x=>x.name!==c.name);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  opts = opts.concat(pool.slice(0,3));
+  for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+
+  const grid = document.getElementById('fc-guess-grid');
+  grid.innerHTML='';
+  opts.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='fc-guess-btn';
+    btn.style.borderLeftColor = o.hex;
+    btn.innerHTML=`<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${o.hex};margin-right:8px;vertical-align:middle;border:1px solid #fff3;"></span>${o.name}`;
+    btn.onclick=()=>checkGuess(btn, o.name===c.name, c);
+    grid.appendChild(btn);
+  });
+}
+
+function checkGuess(btn, correct, c){
+  if(guessAnswered) return;
+  guessAnswered=true; guessTotal++;
+  document.querySelectorAll('#fc-guess-grid .fc-guess-btn').forEach(b=>b.disabled=true);
+  const res = document.getElementById('fc-guess-result');
+  res.style.display='block';
+  if(correct){
+    btn.classList.add('correct'); guessScore++;
+    res.className='fc-result ok'; res.textContent='✅ Correct!';
+    recordAnswer('DIGSAFE',true);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('#fc-guess-grid .fc-guess-btn').forEach(b=>{ if(b.textContent.includes(c.name)) b.classList.add('correct'); });
+    res.className='fc-result no'; res.textContent=`❌ It's ${c.name} — ${c.util}`;
+    recordAnswer('DIGSAFE',false);
+  }
+  document.getElementById('fc-guess-score').textContent=`Score: ${guessScore}/${guessTotal}`;
+  document.getElementById('fc-guess-next').style.display='inline-block';
+}
+
+function nextGuess(){
+  guessIdx++;
+  if(guessIdx >= guessOrder.length){
+    for(let i=guessOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[guessOrder[i],guessOrder[j]]=[guessOrder[j],guessOrder[i]];}
+    guessIdx=0;
+  }
+  renderGuess();
+}
+
+// Guess-the-utility mode
+let guess2Idx=0, guess2Score=0, guess2Total=0, guess2Answered=false;
+let guess2Order = [...Array(digColors.length).keys()];
+
+function renderGuess2(){
+  guess2Answered=false;
+  document.getElementById('fc-guess2-result').style.display='none';
+  document.getElementById('fc-guess2-next').style.display='none';
+  const c = digColors[guess2Order[guess2Idx % guess2Order.length]];
+  document.getElementById('fc-g2-swatch').style.background = c.hex;
+  document.getElementById('fc-g2-swatch').style.color = c.hex;
+  document.getElementById('fc-g2-color').textContent = c.name;
+  document.getElementById('fc-g2-color').style.color = c.hex==='#dddddd'?'#eee':c.hex;
+  document.getElementById('fc-guess2-score').textContent = `Score: ${guess2Score}/${guess2Total}`;
+
+  let opts = [c];
+  const pool = digColors.filter(x=>x.name!==c.name);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  opts = opts.concat(pool.slice(0,3));
+  for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+
+  const grid = document.getElementById('fc-guess2-grid');
+  grid.innerHTML='';
+  opts.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='fc-guess-btn';
+    btn.textContent=o.util;
+    btn.onclick=()=>checkGuess2(btn, o.name===c.name, c);
+    grid.appendChild(btn);
+  });
+}
+
+function checkGuess2(btn, correct, c){
+  if(guess2Answered) return;
+  guess2Answered=true; guess2Total++;
+  document.querySelectorAll('#fc-guess2-grid .fc-guess-btn').forEach(b=>b.disabled=true);
+  const res = document.getElementById('fc-guess2-result');
+  res.style.display='block';
+  if(correct){
+    btn.classList.add('correct'); guess2Score++;
+    res.className='fc-result ok'; res.textContent='✅ Correct!';
+    recordAnswer('DIGSAFE',true);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('#fc-guess2-grid .fc-guess-btn').forEach(b=>{ if(b.textContent===c.util) b.classList.add('correct'); });
+    res.className='fc-result no'; res.textContent=`❌ ${c.name} = ${c.util}`;
+    recordAnswer('DIGSAFE',false);
+  }
+  document.getElementById('fc-guess2-score').textContent=`Score: ${guess2Score}/${guess2Total}`;
+  document.getElementById('fc-guess2-next').style.display='inline-block';
+}
+
+function nextGuess2(){
+  guess2Idx++;
+  if(guess2Idx >= guess2Order.length){
+    for(let i=guess2Order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[guess2Order[i],guess2Order[j]]=[guess2Order[j],guess2Order[i]];}
+    guess2Idx=0;
+  }
+  renderGuess2();
+}
+
+// ══════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════
+const questions = [
+  { cat:"MGL CH. 146 § 53", q:"An operator arrives on site and notices the equipment has not been inspected yet. Under 230 CMR 6, what must happen before the equipment is used?", opts:["The foreman can authorize use without inspection","A pre-shift inspection must be completed and any defects documented","Inspection is only required weekly","The operator can skip inspection if the equipment worked fine yesterday"], ans:1, exp:"Under 230 CMR 6.05, a pre-shift inspection is required before every use. Any defects must be documented and defective equipment must be tagged out and removed from service. There are no exceptions — not even if the equipment ran fine the day before." },
+  { cat:"MGL CH. 146 § 65", q:"An operator works five consecutive days without a valid license. How many separate criminal violations have been committed?", opts:["1 (one continuous act)","2 violations","5 violations — one per day","0 — OSHA card is sufficient"], ans:2, exp:"Under MGL Ch. 146 § 65, each day of operation without a license is a separate offense. Five days = five separate violations, each carrying up to $1,000 fine and/or 1 year imprisonment." },
+  { cat:"230 CMR 6", q:"What is the minimum required clearance between hoisting equipment and energized power lines rated up to 50kV?", opts:["5 feet","10 feet","15 feet","20 feet"], ans:1, exp:"230 CMR 6.08 requires a minimum of 10 feet clearance from energized power lines rated up to 50kV. This is the #1 most tested number on the 2A-1C exam." },
+  { cat:"HAND SIGNALS", q:"An unexpected hazard appears near a worker during a crane lift. Who is allowed to give the STOP signal?", opts:["Only the designated signalperson","Only the foreman","Only the crane operator","Anyone on site"], ans:3, exp:"Any person on site may give the STOP or Emergency STOP signal. The operator must obey immediately. Only the DESIGNATED signalperson gives all other operational signals." },
+  { cat:"MGL CH. 146 § 57", q:"A serious injury occurs at a hoisting operation. Within how many hours must it be reported to the Board of Boiler Rules?", opts:["12 hours","24 hours","48 hours","72 hours"], ans:1, exp:"MGL Ch. 146 § 57 requires reporting serious accidents within 24 hours. Both the operator AND the owner/employer share the reporting obligation independently." },
+  { cat:"DIGSAFE", q:"What color markings indicate the location of gas, oil, or petroleum pipelines?", opts:["Red","Blue","Yellow","Orange"], ans:2, exp:"Yellow markings indicate gas, oil, steam, petroleum, or gaseous materials. Red = electric. Blue = potable water. Orange = telecom/signal lines." },
+  { cat:"DIGSAFE", q:"How many hours in advance must you notify DigSafe before excavating (excluding weekends and holidays)?", opts:["24 hours","48 hours","72 hours","96 hours"], ans:2, exp:"Massachusetts requires DigSafe notification at least 72 hours (3 business days) before excavation. Call 811 or 1-888-DIG-SAFE." },
+  { cat:"ACCIDENT SCENE", q:"After a fatal crane accident, the employer orders the operator to move the crane to continue work. What should the operator do?", opts:["Follow the employer — they're responsible","Move it only after police clear the scene","Refuse until the Board of Boiler Rules Inspector releases it","Move it if the foreman puts it in writing"], ans:2, exp:"The Board of Boiler Rules Inspector must formally release hoisting equipment before it can be moved. The employer has NO authority to release the scene. Moving it beforehand is a criminal offense." },
+  { cat:"230 CMR 6", q:"An operator's license expired 2 months ago but they continue operating a crane. What offense have they committed?", opts:["No offense — there's a grace period","Minor administrative violation only","Same offense as operating with no license","Violation only if they caused an accident"], ans:2, exp:"Operating with an expired license is treated identically to operating with no license. There is no grace period under MGL Ch. 146 § 54A." },
+  { cat:"230 CMR 6", q:"A crane operator believes ground conditions are unsafe for the planned lift. What is the operator's right?", opts:["Must proceed if the foreman orders it","Can refuse and cannot be disciplined for it","May raise concerns but must ultimately obey","Should call OSHA before deciding"], ans:1, exp:"Under 230 CMR 6.05, a licensed operator has the absolute right to refuse unsafe equipment. They cannot be fired, disciplined, or penalized for this refusal." },
+  { cat:"HAND SIGNALS", q:"What does it mean when a signalperson places one hand motionless in front of the hand giving the motion signal?", opts:["Dog everything — pause","Emergency stop","Move slowly / fine control","Switch to main hoist"], ans:2, exp:"One hand motionless in front of the active signaling hand means 'move slowly' — use fine, precise control. It modifies the accompanying signal." },
+  { cat:"MGL CH. 146 § 53A", q:"Which body issues and revokes Massachusetts hoisting licenses?", opts:["OSHA","Department of Transportation","Board of Boiler Rules","Department of Labor"], ans:2, exp:"The Board of Boiler Rules (under the Department of Public Safety) is the licensing authority for hoisting machinery in Massachusetts under MGL Ch. 146 § 53A." },
+  { cat:"DIGSAFE", q:"Before calling DigSafe, what color should you use to mark your proposed excavation limits?", opts:["Orange","Pink","White","Blue"], ans:2, exp:"White markings indicate the operator's proposed excavation area. You mark your dig zone in white so utility locators know exactly where to check." },
+  { cat:"230 CMR 6", q:"When must outriggers be fully extended before a lift?", opts:["Only for loads over 50,000 lbs","Always, before any lift, unless the load chart permits otherwise","Only on soft ground","Only with full boom extension"], ans:1, exp:"Under 230 CMR 6.06, outriggers must be fully extended and set before any lift unless the manufacturer's load chart specifically provides capacity ratings for partial/no outriggers." },
+  { cat:"HAND SIGNALS", q:"How does a signalperson signal the operator to hoist the load?", opts:["Both arms raised overhead","Forearm vertical, forefinger up, rotating hand in small circles","Thumb up, arm fully extended","Fist raised and pumped vertically"], ans:1, exp:"The standard ASME hoist signal: forearm vertical, forefinger pointing up, rotate hand in small horizontal circles. Don't confuse with a simple thumbs-up." },
+  { cat:"230 CMR 6", q:"The load chart is missing from the cab. The supervisor says he knows the capacities by memory. What should the operator do?", opts:["Proceed — supervisor's knowledge is sufficient","Refuse to operate until the chart is physically in the cab","Use a chart from a similar model","Call manufacturer for verbal confirmation"], ans:1, exp:"Under 230 CMR 6, the load chart must be physically present and legible in the cab. Operating without it is a violation regardless of anyone's claimed memory." },
+  { cat:"MGL CH. 146 § 65", q:"What is the maximum penalty for knowingly employing an unlicensed hoisting operator?", opts:["No criminal penalty — only fines","Up to $500 fine","Same as the operator — up to $1,000 and/or 1 year per day","Only OSHA can penalize employers"], ans:2, exp:"Under MGL Ch. 146 § 65, an employer who knowingly employs an unlicensed operator faces the same criminal penalties — up to $1,000 per day and/or up to 1 year per day." },
+  { cat:"ACCIDENT SCENE", q:"Which authority CANNOT release an accident scene involving hoisting equipment?", opts:["Board of Boiler Rules Inspector","OSHA compliance officer","The employer / site owner","State Police"], ans:2, exp:"The employer and site owner have NO authority to release a hoisting accident scene. Board Inspector, OSHA (where applicable), police, and Medical Examiner (fatalities) may — but not the employer." },
+  { cat:"DIGSAFE", q:"What color marks telecommunications and alarm/signal cables?", opts:["Yellow","Red","Orange","Purple"], ans:2, exp:"Orange marks telecommunications, alarm or signal lines, cables or conduit. Red = electric. Yellow = gas/petroleum. Purple = reclaimed water." },
+  { cat:"230 CMR 6", q:"A second worker begins giving hand signals to the crane operator while a designated signalperson is already assigned. What must the operator do?", opts:["Follow the most recent signal","Follow whichever signal seems safest","Stop all crane operations until there is only one signalperson","Follow the second worker for lowering operations only"], ans:2, exp:"Only ONE designated signalperson. If a second person gives signals (other than STOP), the operator must stop all crane operations until signaling is clarified. Ambiguous signals = stop." },
+  { cat:"MGL CH. 146 § 54A", q:"What is the minimum age to obtain a hoisting license in Massachusetts?", opts:["16 years","17 years","18 years","21 years"], ans:2, exp:"MGL Ch. 146 § 54A requires applicants to be at least 18 years old." },
+  { cat:"230 CMR 6", q:"Workers must be positioned where in relation to a suspended load?", opts:["Within arm's reach to guide it","Directly under it to spot the landing","Never beneath or in the path of a suspended load","Above the load on a scaffold"], ans:2, exp:"No worker may be positioned under or in the swing/fall path of a suspended load under any circumstances. This is absolute under 230 CMR and OSHA." },
+  { cat:"ACCIDENT SCENE", q:"A crane collapses with no injuries — only property damage. Must it be reported to the Board of Boiler Rules?", opts:["No — only injury accidents must be reported","Only if damage exceeds $50,000","Yes — substantial property damage must be reported within 24 hours","Only OSHA, not the Board"], ans:2, exp:"MGL Ch. 146 § 57 requires reporting for death, serious injury, OR substantial property damage. A crane collapse without injury still triggers the 24-hour reporting requirement." },
+  { cat:"DIGSAFE", q:"What does a purple/violet marking indicate in the DigSafe color code system?", opts:["Temporary survey markings","Electric power lines","Reclaimed water, irrigation, or slurry lines","Fiber optic cables"], ans:2, exp:"Purple/violet = reclaimed water, irrigation, and slurry lines. Pink = temporary survey. Red = electric. Orange = telecom." },
+  { cat:"MGL CH. 146 § 57", q:"Who bears responsibility for reporting a hoisting accident to the Board of Boiler Rules?", opts:["Only the crane operator","Only the employer/owner","Both the operator AND the owner/employer","The site safety officer only"], ans:2, exp:"Under MGL Ch. 146 § 57, both the operator and the owner/employer are independently obligated to report. If one fails to report, both can be cited. It is not 'either/or'." },
+];
+
+let currentQ=0, score=0, answered=false, liveWrong=0, currentStreak=0;
+let catStats = {};
+
+function renderQuestion(){
+  const q = questions[currentQ];
+  answered=false;
+  const pct = ((currentQ+1)/questions.length*100).toFixed(0);
+  document.getElementById('q-counter').textContent = `QUESTION ${currentQ+1} OF ${questions.length}`;
+  document.getElementById('q-score-live').textContent = `✓ ${score}  ✗ ${liveWrong}`;
+  document.getElementById('q-progress-fill').style.width = pct+'%';
+  document.getElementById('explanation').className='explanation';
+  document.getElementById('explanation').innerHTML='';
+  document.getElementById('next-btn').className='next-btn';
+  document.getElementById('question-box').innerHTML=`
+    <div class="q-category">${q.cat}</div>
+    <div class="question-text">${q.q}</div>
+    ${q.opts.map((o,i)=>`<button class="answer-btn" onclick="checkAnswer(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}
+  `;
+}
+
+function checkAnswer(idx){
+  if(answered) return;
+  answered=true;
+  const q=questions[currentQ];
+  document.querySelectorAll('.answer-btn').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.answer-btn')[q.ans].classList.add('correct');
+  const correct = idx===q.ans;
+  if(!correct) document.querySelectorAll('.answer-btn')[idx].classList.add('wrong');
+
+  if(correct){ score++; currentStreak++; updateBestStreak(currentStreak); }
+  else { liveWrong++; currentStreak=0; }
+
+  // track category
+  if(!catStats[q.cat]) catStats[q.cat]={a:0,t:0};
+  catStats[q.cat].t++;
+  if(correct) catStats[q.cat].a++;
+  recordAnswer(q.cat, correct);
+
+  document.getElementById('q-score-live').textContent = `✓ ${score}  ✗ ${liveWrong}`;
+  const exp=document.getElementById('explanation');
+  exp.innerHTML=`<strong>${correct?'✅ Correct!':'❌ Incorrect.'}</strong> ${q.exp}`;
+  exp.classList.add('show');
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQuestion(){
+  currentQ++;
+  if(currentQ>=questions.length){
+    document.getElementById('quiz-container').style.display='none';
+    const sb=document.getElementById('score-box'); sb.classList.add('show');
+    const pct=Math.round(score/questions.length*100);
+    document.getElementById('score-num').textContent=`${score}/${questions.length}`;
+    document.getElementById('score-msg').textContent = pct>=80?"🎉 Excellent! You're well prepared for Monday.":pct>=60?"📚 Good effort — review the topics you missed.":"💪 Keep drilling — focus on law sections and key numbers.";
+    // breakdown
+    let html='';
+    Object.entries(catStats).forEach(([cat,d])=>{
+      const p=d.t>0?Math.round(d.a/d.t*100):0;
+      const col=p>=80?'var(--green)':p>=50?'var(--accent)':'var(--accent2)';
+      html+=`<div class="cat-row"><div class="cat-name" style="font-size:0.68rem;">${cat.replace('MGL CH. 146 ','')}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${p}%;background:${col};"></div></div><div class="cat-pct">${p}%</div></div>`;
+    });
+    document.getElementById('result-cats').innerHTML=html;
+  } else { renderQuestion(); }
+}
+
+function restartQuiz(){
+  currentQ=0; score=0; liveWrong=0; answered=false; currentStreak=0; catStats={};
+  document.getElementById('quiz-container').style.display='block';
+  document.getElementById('score-box').classList.remove('show');
+  for(let i=questions.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[questions[i],questions[j]]=[questions[j],questions[i]];}
+  renderQuestion();
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  try { updateRing(); } catch(e){}
+  try { renderBookmarks(); restoreBookmarkBtns(); } catch(e){}
+  try { renderFC(); } catch(e){}
+  try { recordSession(); } catch(e){}
+  try {
+    document.getElementById('fc-swatch-back').style.width='44px';
+    document.getElementById('fc-swatch-back').style.height='44px';
+    document.getElementById('fc-swatch-back').style.borderRadius='50%';
+  } catch(e){}
+  // Render first quiz question
+  try { renderQuestion(); } catch(e){ console.error('Quiz init error:',e); }
+});
+</script>
+</body>
+</html>
