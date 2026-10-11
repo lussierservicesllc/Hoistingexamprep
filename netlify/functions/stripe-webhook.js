@@ -145,7 +145,7 @@ exports.handler = async function (event, context) {
         access_code: accessCode,
         product_name: '2A-1C Hoisting License Study Tool',
         site_url: 'https://hoistingexamprep.com',
-        support_email: OWNER_EMAIL || 'chrislussier34@gmail.com',
+        support_email: 'lussierservicesllc@gmail.com',
       }
     );
 
@@ -156,11 +156,11 @@ exports.handler = async function (event, context) {
       EMAILJS_USER_ID,
       {
         to_email: OWNER_EMAIL || 'chrislussier34@gmail.com',
-        to_name: 'Chris',
+        to_name: 'Chris (NEW SALE: ' + buyerEmail + ', $' + amountPaid + ')',
         access_code: accessCode,
         product_name: 'SALE NOTIFICATION — 2A-1C Study Tool',
-        site_url: buyerEmail + ' paid $' + amountPaid,
-        support_email: 'Buyer: ' + buyerEmail,
+        site_url: 'https://hoistingexamprep.com',
+        support_email: 'lussierservicesllc@gmail.com',
       }
     );
 
