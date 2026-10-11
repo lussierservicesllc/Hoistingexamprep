@@ -11,6 +11,7 @@
 //     EMAILJS_SERVICE_ID      = your EmailJS service ID
 //     EMAILJS_TEMPLATE_ID     = your EmailJS template ID
 //     EMAILJS_USER_ID         = your EmailJS public key
+//     EMAILJS_PRIVATE_KEY     = your EmailJS private key (Account > General)
 //     OWNER_EMAIL             = chrislussier34@gmail.com
 // ================================================================
 
@@ -55,6 +56,7 @@ function sendEmail(serviceId, templateId, userId, params) {
       service_id: serviceId,
       template_id: templateId,
       user_id: userId,
+      accessToken: process.env.EMAILJS_PRIVATE_KEY,
       template_params: params,
     });
     const options = {
@@ -69,7 +71,13 @@ function sendEmail(serviceId, templateId, userId, params) {
     const req = https.request(options, (res) => {
       let body = '';
       res.on('data', (chunk) => (body += chunk));
-      res.on('end', () => resolve({ status: res.statusCode, body }));
+      res.on('end', () => {
+        if (res.statusCode === 200) {
+          resolve({ status: res.statusCode, body });
+        } else {
+          reject(new Error('EmailJS responded ' + res.statusCode + ': ' + body));
+        }
+      });
     });
     req.on('error', reject);
     req.write(data);
