@@ -521,7 +521,23 @@ footer {
   .hero-stats { gap: 24px; }
   .footer-inner { flex-direction: column; align-items: flex-start; }
 }
+
+/* ── ACCOUNTS ── */
+.auth-field { width:100%; padding:12px 14px; border:1px solid var(--ma-border); border-radius:6px; font-size:0.95rem; margin-bottom:12px; font-family:var(--body); outline:none; }
+.auth-field:focus { border-color: var(--ma-navy); }
+.auth-submit { width:100%; background:var(--ma-cran); color:#fff; border:none; border-radius:6px; padding:14px; font-family:var(--heading); font-size:1.15rem; letter-spacing:2px; cursor:pointer; }
+.auth-submit:disabled { opacity:0.6; cursor:default; }
+.auth-msg { font-size:0.85rem; margin:0 0 12px; display:none; padding:10px 12px; border-radius:6px; }
+.auth-msg.err { display:block; background:#FDECEA; color:var(--ma-cran-dk); }
+.auth-msg.ok { display:block; background:#E8F5EE; color:var(--ma-green); }
+.auth-links { text-align:center; font-size:0.82rem; color:var(--ma-muted); margin-top:14px; line-height:1.9; }
+.auth-links a { color:var(--ma-navy); font-weight:600; cursor:pointer; }
+.hdr-btn { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:4px; padding:8px 14px; font-family:var(--mono); font-size:0.68rem; color:#fff; letter-spacing:1px; cursor:pointer; white-space:nowrap; }
+.gate-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:18px 0 6px; }
+.gate-actions button { border:none; border-radius:6px; padding:13px 22px; font-family:var(--heading); font-size:1.1rem; letter-spacing:2px; cursor:pointer; background:var(--ma-cran); color:#fff; }
+.gate-actions button.alt { background:var(--ma-navy); }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -546,13 +562,34 @@ footer {
         <div class="item"><span class="ck">✓</span> Progress tracker &amp; topic breakdown</div>
         <div class="item"><span class="ck">✓</span> Quick reference cheat sheet</div>
       </div>
-      <a href="https://buy.stripe.com/4gM5kE7R57QWdJL6GE6sw01" target="_blank" class="buy-stripe-btn" id="buy-action-btn">
+      <a href="#" onclick="startPurchase(event);return false;" class="buy-stripe-btn" id="buy-action-btn">
         PURCHASE FOR $29 →
       </a>
       <div class="buy-modal-alt">
         Questions? Email <a href="mailto:lussierservicesllc@gmail.com">lussierservicesllc@gmail.com</a><br>
-        <span style="font-size:0.75rem;margin-top:6px;display:block;">Access code delivered by email moments after purchase</span>
+        <span style="font-size:0.75rem;margin-top:6px;display:block;">Access is added to your free account right after purchase &mdash; use the same email at checkout.</span>
+        <span style="font-size:0.75rem;margin-top:6px;display:block;"><a href="#" onclick="buyAsGuest(event);return false;" style="font-weight:400;text-decoration:underline;">Buy now and create my account after</a></span>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="buy-modal-overlay" id="auth-modal" onclick="if(event.target===this)closeAuth()">
+  <div class="buy-modal">
+    <div class="buy-modal-header">
+      <h3 id="auth-title">SIGN IN</h3>
+      <button class="buy-modal-close" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="buy-modal-body">
+      <form id="auth-form" onsubmit="submitAuth(event)">
+        <div id="auth-msg" class="auth-msg"></div>
+        <input class="auth-field" id="auth-email" type="email" placeholder="Email" autocomplete="email" required/>
+        <input class="auth-field" id="auth-pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password" minlength="8" required/>
+        <button class="auth-submit" id="auth-submit" type="submit">SIGN IN</button>
+      </form>
+      <div class="auth-links" id="auth-links"></div>
+      <div class="auth-links" style="font-size:0.75rem;margin-top:6px;">Free account &middot; No spam &mdash; we only send receipts and password resets.</div>
     </div>
   </div>
 </div>
@@ -573,10 +610,7 @@ footer {
     </div>
   </a>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
-    <div style="display:flex;align-items:center;gap:6px;">
-      <input id="header-code-input" type="text" placeholder="Have a code? Enter here..." style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);border-radius:4px;padding:8px 12px;font-family:var(--mono);font-size:0.68rem;color:#fff;letter-spacing:1px;width:190px;outline:none;" onkeydown="if(event.key==='Enter')headerCheckCode()"/>
-      <button onclick="headerCheckCode()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:4px;padding:8px 14px;font-family:var(--mono);font-size:0.68rem;color:#fff;letter-spacing:1px;cursor:pointer;white-space:nowrap;">Unlock →</button>
-    </div>
+    <div id="auth-header" style="display:flex;align-items:center;gap:8px;"><button class="hdr-btn" onclick="openAuth('signin')">Sign in</button></div>
     <button onclick="openBuyModal()" style="background:none;border:none;font-family:var(--mono);font-size:0.68rem;color:rgba(255,255,255,0.7);cursor:pointer;letter-spacing:1px;">$29 Full Access</button>
     <button onclick="scrollToSample()" class="header-cta">Free Sample Quiz</button>
   </div>
@@ -794,20 +828,21 @@ footer {
     <div id="gate-wrap" class="gate-wrap">
       <span class="gate-icon">🔓</span>
       <div class="gate-title">Get Full Access</div>
-      <div class="gate-sub">Enter your access code to unlock the complete 2A-1C study tool. After purchase you'll receive a code by email.</div>
-      <div class="gate-input-row">
+      <div class="gate-sub" id="gate-sub">Create a free account (or sign in) to unlock the complete 2A-1C study tool.</div>
+      <div class="gate-actions" id="gate-actions"></div>
+      <div class="gate-input-row" id="gate-code-row" style="display:none;">
         <input class="gate-input" id="gate-input" type="text" placeholder="Enter access code..." autocomplete="off"/>
-        <button class="gate-btn" onclick="checkCode()">Unlock</button>
+        <button class="gate-btn" onclick="checkCode()">Redeem</button>
       </div>
-      <div class="gate-note">Access codes are sent to your email after purchase · Codes are single-device</div>
-      <div id="gate-error" style="color:var(--ma-cran);font-size:0.82rem;margin-top:10px;display:none;">Invalid code. Please check your email and try again.</div>
+      <div class="gate-note" id="gate-note">Free account &middot; No spam &mdash; we only send receipts and password resets.</div>
+      <div id="gate-error" style="color:var(--ma-cran);font-size:0.82rem;margin-top:10px;display:none;">That code didn't work. Check it and try again.</div>
     </div>
     <div id="tool-embed">
       <div style="background:var(--ma-navy);padding:12px 24px;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;">
         <span style="font-family:var(--heading);font-size:1rem;letter-spacing:2px;color:#fff;">🏗️ FULL 2A-1C STUDY TOOL</span>
         <span style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.5);letter-spacing:1px;">FULL ACCESS UNLOCKED ✓</span>
       </div>
-      <iframe id="tool-iframe" src="2A1C_Study_Tool.html" title="2A-1C Hoisting License Study Tool"></iframe>
+      <iframe id="tool-iframe" title="2A-1C Hoisting License Study Tool"></iframe>
     </div>
   </div>
 </section>
@@ -836,41 +871,6 @@ footer {
 </div>
 
 <script>
-// ── HEADER CODE CHECK ──
-function headerCheckCode(){
-  var code = document.getElementById('header-code-input').value.trim().toUpperCase();
-  if(!code) return;
-  var inp = document.getElementById('header-code-input');
-  inp.style.borderColor = 'rgba(255,255,255,0.25)';
-
-  fetch('/.netlify/functions/validate-code', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: code })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
-    if(data.valid){
-      unlockTool();
-      // scroll down to the tool
-      setTimeout(function(){
-        document.getElementById('full-tool-section').scrollIntoView({behavior:'smooth'});
-      }, 200);
-    } else {
-      inp.style.borderColor = 'var(--ma-cran)';
-      inp.placeholder = 'Invalid code — try again';
-      inp.value = '';
-      setTimeout(function(){ inp.placeholder = 'Have a code? Enter here...'; inp.style.borderColor='rgba(255,255,255,0.25)'; }, 2500);
-    }
-  })
-  .catch(function(){
-    inp.style.borderColor = 'var(--ma-cran)';
-    inp.placeholder = 'Connection problem — try again';
-    inp.value = '';
-    setTimeout(function(){ inp.placeholder = 'Have a code? Enter here...'; inp.style.borderColor='rgba(255,255,255,0.25)'; }, 2500);
-  });
-}
-
 // ── SCROLL HELPER (accounts for sticky header height) ──
 function scrollToSample() {
   var el = document.getElementById('sample');
@@ -972,53 +972,233 @@ function sqRestart(){
   sqRender();
 }
 
-// ── GATE / UNLOCK ──
-function checkCode(){
-  var code = document.getElementById('gate-input').value.trim().toUpperCase();
-  var btn = document.querySelector('.gate-btn');
-  btn.textContent = 'Checking...';
-  btn.disabled = true;
+// ── ACCOUNTS (Supabase) ──
+var SB_URL = 'https://hpysmmtjucxkdeupnlfr.supabase.co';
+var SB_KEY = 'sb_publishable_pmB4juBLT_D0aqv8eT3ylw_vclFiTtS';
+var STRIPE_LINK = 'https://buy.stripe.com/4gM5kE7R57QWdJL6GE6sw01';
+var sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+var authSession = null;
+var authMode = 'signin';
+var toolHtml = null;
+var purchasedFlag = /[?&]purchased=1/.test(location.search);
 
-  fetch('/.netlify/functions/validate-code', {
+function $(id){ return document.getElementById(id); }
+
+function authMessage(text, ok){
+  var m = $('auth-msg');
+  if(!text){ m.className = 'auth-msg'; m.textContent = ''; return; }
+  m.className = 'auth-msg ' + (ok ? 'ok' : 'err');
+  m.textContent = text;
+}
+
+function setAuthMode(mode){
+  authMode = mode;
+  var title = $('auth-title'), btn = $('auth-submit'), pass = $('auth-pass'), email = $('auth-email'), links = $('auth-links');
+  authMessage('');
+  email.style.display = (mode === 'newpass') ? 'none' : 'block';
+  email.required = (mode !== 'newpass');
+  pass.style.display = (mode === 'reset') ? 'none' : 'block';
+  pass.required = (mode !== 'reset');
+  pass.autocomplete = (mode === 'signin') ? 'current-password' : 'new-password';
+  pass.placeholder = (mode === 'newpass') ? 'New password (8+ characters)' : 'Password (8+ characters)';
+  if(mode === 'signin'){
+    title.textContent = 'SIGN IN'; btn.textContent = 'SIGN IN';
+    links.innerHTML = 'New here? <a onclick="setAuthMode(\'signup\')">Create a free account</a><br><a onclick="setAuthMode(\'reset\')">Forgot password?</a>';
+  } else if(mode === 'signup'){
+    title.textContent = 'CREATE FREE ACCOUNT'; btn.textContent = 'CREATE ACCOUNT';
+    links.innerHTML = 'Already have an account? <a onclick="setAuthMode(\'signin\')">Sign in</a>';
+  } else if(mode === 'reset'){
+    title.textContent = 'RESET PASSWORD'; btn.textContent = 'SEND RESET LINK';
+    links.innerHTML = '<a onclick="setAuthMode(\'signin\')">Back to sign in</a>';
+  } else {
+    title.textContent = 'CHOOSE NEW PASSWORD'; btn.textContent = 'SAVE PASSWORD';
+    links.innerHTML = '';
+  }
+}
+
+function openAuth(mode, note){
+  setAuthMode(mode || 'signin');
+  if(note) authMessage(note, true);
+  $('auth-modal').classList.add('open');
+}
+function closeAuth(){ $('auth-modal').classList.remove('open'); }
+
+function submitAuth(e){
+  e.preventDefault();
+  if(!sb){ authMessage('Sign-in is temporarily unavailable. Please refresh and try again.'); return; }
+  var email = $('auth-email').value.trim();
+  var pass = $('auth-pass').value;
+  var btn = $('auth-submit');
+  var label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'PLEASE WAIT...';
+  authMessage('');
+  var done = function(){ btn.disabled = false; btn.textContent = label; };
+  var fail = function(err){ done(); authMessage((err && err.message) ? err.message : 'Something went wrong. Please try again.'); };
+
+  if(authMode === 'signin'){
+    sb.auth.signInWithPassword({ email: email, password: pass }).then(function(r){
+      done();
+      if(r.error){ authMessage(r.error.message); return; }
+      closeAuth();
+    }).catch(fail);
+  } else if(authMode === 'signup'){
+    sb.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: location.origin + '/' } }).then(function(r){
+      done();
+      if(r.error){ authMessage(r.error.message); return; }
+      if(r.data && r.data.session){ closeAuth(); return; }
+      authMessage('Almost done! Check your email for a confirmation link, then come back and sign in.', true);
+    }).catch(fail);
+  } else if(authMode === 'reset'){
+    sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/' }).then(function(r){
+      done();
+      if(r.error){ authMessage(r.error.message); return; }
+      authMessage('If that email has an account, a reset link is on its way.', true);
+    }).catch(fail);
+  } else {
+    sb.auth.updateUser({ password: pass }).then(function(r){
+      done();
+      if(r.error){ authMessage(r.error.message); return; }
+      authMessage('Password updated.', true);
+      setTimeout(closeAuth, 1200);
+    }).catch(fail);
+  }
+}
+
+function signOut(){
+  if(!sb) return;
+  sb.auth.signOut().then(function(){
+    authSession = null; toolHtml = null;
+    $('tool-iframe').srcdoc = '';
+    renderAuthUI();
+  });
+}
+
+function renderAuthUI(){
+  var h = $('auth-header');
+  if(authSession){
+    h.innerHTML = '<span style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.7);letter-spacing:1px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span><button class="hdr-btn" onclick="signOut()">Sign out</button>';
+    h.firstChild.textContent = authSession.user.email;
+  } else {
+    h.innerHTML = '<button class="hdr-btn" onclick="openAuth(\'signin\')">Sign in</button>';
+  }
+}
+
+// ── GATE ──
+function showGate(state){
+  $('gate-wrap').style.display = 'block';
+  $('tool-embed').style.display = 'none';
+  var sub = $('gate-sub'), actions = $('gate-actions'), row = $('gate-code-row');
+  $('gate-error').style.display = 'none';
+  if(state === 'out'){
+    sub.textContent = 'Create a free account (or sign in) to unlock the complete 2A-1C study tool.';
+    actions.innerHTML = '<button onclick="openAuth(\'signup\')">Create free account</button><button class="alt" onclick="openAuth(\'signin\')">Sign in</button>';
+    row.style.display = 'none';
+  } else if(state === 'nobuy'){
+    sub.textContent = 'You\'re signed in. Get full access with a one-time $29 purchase, or redeem an access code if you already have one.';
+    actions.innerHTML = '<button onclick="openBuyModal()">Get full access &mdash; $29</button><button class="alt" onclick="document.getElementById(\'gate-code-row\').style.display=\'flex\'">I have a code</button>';
+    row.style.display = 'none';
+  } else if(state === 'checking'){
+    sub.textContent = 'Checking your access...';
+    actions.innerHTML = '';
+    row.style.display = 'none';
+  } else {
+    sub.textContent = 'We couldn\'t reach the server. Please refresh and try again.';
+    actions.innerHTML = '';
+    row.style.display = 'none';
+  }
+}
+
+function showTool(html){
+  toolHtml = html;
+  $('gate-wrap').style.display = 'none';
+  $('tool-embed').style.display = 'block';
+  $('tool-iframe').srcdoc = html;
+}
+
+function checkAccess(retries){
+  if(!authSession){ showGate('out'); return; }
+  if(toolHtml){ showTool(toolHtml); return; }
+  showGate('checking');
+  fetch('/.netlify/functions/get-tool', { headers: { Authorization: 'Bearer ' + authSession.access_token } })
+  .then(function(r){
+    if(r.status === 200){ return r.text().then(function(html){
+      showTool(html);
+      if(purchasedFlag){ purchasedFlag = false; setTimeout(function(){ $('full-tool-section').scrollIntoView({behavior:'smooth'}); }, 200); }
+    }); }
+    if(r.status === 403){
+      if(purchasedFlag && retries > 0){ setTimeout(function(){ checkAccess(retries - 1); }, 2500); return; }
+      showGate('nobuy'); return;
+    }
+    if(r.status === 401){ showGate('out'); return; }
+    showGate('error');
+  })
+  .catch(function(){ showGate('error'); });
+}
+
+function checkCode(){
+  if(!authSession){ openAuth('signin'); return; }
+  var code = $('gate-input').value.trim().toUpperCase();
+  var btn = document.querySelector('.gate-btn');
+  if(!code) return;
+  btn.textContent = 'Checking...'; btn.disabled = true;
+  fetch('/.netlify/functions/redeem-code', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authSession.access_token },
     body: JSON.stringify({ code: code })
   })
   .then(function(r){ return r.json(); })
   .then(function(data){
-    btn.textContent = 'Unlock';
-    btn.disabled = false;
-    if(data.valid){
-      unlockTool();
-    } else {
-      document.getElementById('gate-error').style.display='block';
-      document.getElementById('gate-input').style.borderColor='var(--ma-cran)';
+    btn.textContent = 'Redeem'; btn.disabled = false;
+    if(data.ok){ $('gate-error').style.display = 'none'; checkAccess(0); }
+    else {
+      var e = $('gate-error');
+      e.textContent = data.error === 'used' ? 'That code has already been used.' : 'That code didn\'t work. Check it and try again.';
+      e.style.display = 'block';
     }
   })
   .catch(function(){
-    btn.textContent = 'Unlock';
-    btn.disabled = false;
-    document.getElementById('gate-error').style.display='block';
-    document.getElementById('gate-input').style.borderColor='var(--ma-cran)';
+    btn.textContent = 'Redeem'; btn.disabled = false;
+    var e = $('gate-error'); e.textContent = 'Connection problem. Please try again.'; e.style.display = 'block';
   });
 }
 
-function unlockTool(){
-  document.getElementById('gate-wrap').style.display='none';
-  document.getElementById('tool-embed').style.display='block';
-  document.getElementById('tool-iframe').src='2A1C_Study_Tool.html';
-  // scroll to tool
-  setTimeout(function(){
-    document.getElementById('full-tool-section').scrollIntoView({behavior:'smooth'});
-  }, 100);
+// ── PURCHASE ──
+function startPurchase(ev){
+  if(ev && ev.preventDefault) ev.preventDefault();
+  if(!authSession){
+    closeBuyModal();
+    openAuth('signup', 'Create your free account first, then complete your purchase using the same email.');
+    return;
+  }
+  window.location.href = STRIPE_LINK + '?prefilled_email=' + encodeURIComponent(authSession.user.email) + '&client_reference_id=' + encodeURIComponent(authSession.user.id);
 }
+function buyAsGuest(ev){
+  if(ev && ev.preventDefault) ev.preventDefault();
+  window.location.href = STRIPE_LINK;
+}
+function unlockTool(){ checkAccess(0); }
 
-// Enter key on gate input
+if(sb) sb.auth.onAuthStateChange(function(event, session){
+  authSession = session;
+  if(!session) toolHtml = null;
+  renderAuthUI();
+  if(event === 'PASSWORD_RECOVERY'){ openAuth('newpass'); return; }
+  if(event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT'){
+    setTimeout(function(){ checkAccess(purchasedFlag ? 6 : 0); }, 0);
+  }
+});
+
 document.addEventListener('DOMContentLoaded', function(){
   sqRender();
-  var inp = document.getElementById('gate-input');
+  var inp = $('gate-input');
   if(inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') checkCode(); });
+  if(purchasedFlag){
+    setTimeout(function(){
+      if(!authSession) openAuth('signup', 'Payment received! Create your account using the same email you used at checkout and your access will be waiting.');
+    }, 800);
+  }
 });
+
 </script>
 
 </body>
