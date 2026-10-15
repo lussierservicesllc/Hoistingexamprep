@@ -140,6 +140,19 @@ exports.handler = async function (event, context) {
   const accessCode = generateCode();
   console.log(`New purchase: ${buyerEmail} → code: ${accessCode}`);
 
+  // ── Grant account access in Supabase (matched by buyer email) ──
+  try {
+    const sbKey = process.env.SUPABASE_SECRET_KEY;
+    const gr = await fetch('https://hpysmmtjucxkdeupnlfr.supabase.co/rest/v1/entitlements?on_conflict=email,product', {
+      method: 'POST',
+      headers: { apikey: sbKey, 'Content-Type': 'application/json', Prefer: 'resolution=ignore-duplicates,return=minimal' },
+      body: JSON.stringify({ email: buyerEmail.toLowerCase(), product: '2a1c', source: 'stripe' }),
+    });
+    if (!gr.ok) console.error('Entitlement grant failed:', gr.status, await gr.text());
+  } catch (e) {
+    console.error('Entitlement grant error:', e);
+  }
+
   try {
     // ── Email 1: Send access code to buyer ──
     await sendEmail(
