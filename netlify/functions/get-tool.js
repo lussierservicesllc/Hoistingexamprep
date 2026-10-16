@@ -15,7 +15,7 @@ async function getUser(token) {
 }
 
 async function hasAccess(email) {
-  const key = (process.env.SUPABASE_SECRET_KEY || '').trim();
+  const key = (process.env.SUPABASE_SECRET_KEY || '').replace(/\s+/g, '');
   if (!key) throw new Error('SUPABASE_SECRET_KEY not set');
   const url = SUPABASE_URL + '/rest/v1/entitlements?select=id&product=eq.' + PRODUCT +
     '&email=eq.' + encodeURIComponent(email) + '&limit=1';
