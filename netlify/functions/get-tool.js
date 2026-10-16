@@ -20,7 +20,7 @@ async function hasAccess(email) {
   const url = SUPABASE_URL + '/rest/v1/entitlements?select=id&product=eq.' + PRODUCT +
     '&email=eq.' + encodeURIComponent(email) + '&limit=1';
   const r = await fetch(url, { headers: { apikey: key } });
-  if (!r.ok) throw new Error('entitlement lookup failed: ' + r.status);
+  if (!r.ok) { let b=''; try{ b=(await r.text()).slice(0,200);}catch(e){} throw new Error('entitlement lookup failed: ' + r.status + ' keylen=' + key.length + ' pre=' + key.slice(0,10) + ' ws=' + /\s/.test(key) + ' body=' + b); }
   const rows = await r.json();
   return rows.length > 0;
 }
