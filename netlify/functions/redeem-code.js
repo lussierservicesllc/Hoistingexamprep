@@ -47,7 +47,7 @@ exports.handler = async function (event) {
     const type = codeType(code);
     if (!type) return json(200, { ok: false, error: 'invalid' });
 
-    const key = process.env.SUPABASE_SECRET_KEY;
+    const key = (process.env.SUPABASE_SECRET_KEY || '').trim();
     const H = { apikey: key, 'Content-Type': 'application/json' };
     const source = 'code:' + code;
 
