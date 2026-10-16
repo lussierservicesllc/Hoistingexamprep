@@ -142,7 +142,7 @@ exports.handler = async function (event, context) {
 
   // ── Grant account access in Supabase (matched by buyer email) ──
   try {
-    const sbKey = (process.env.SUPABASE_SECRET_KEY || '').trim();
+    const sbKey = (process.env.SUPABASE_SECRET_KEY || '').replace(/\s+/g, '');
     const gr = await fetch('https://hpysmmtjucxkdeupnlfr.supabase.co/rest/v1/entitlements?on_conflict=email,product', {
       method: 'POST',
       headers: { apikey: sbKey, 'Content-Type': 'application/json', Prefer: 'resolution=ignore-duplicates,return=minimal' },
