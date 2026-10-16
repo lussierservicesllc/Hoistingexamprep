@@ -54,6 +54,6 @@ exports.handler = async function (event) {
     };
   } catch (err) {
     console.error('get-tool error:', err);
-    return { statusCode: 500, body: 'Server error' };
+    return { statusCode: 500, body: 'Server error: ' + (err && err.message ? err.message : String(err)) };
   }
 };
